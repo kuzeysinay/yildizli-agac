@@ -36,8 +36,8 @@ export default function Home() {
       <header className="container relative z-10 mx-auto px-4 py-6 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between">
           <div className="w-24 sm:w-32"></div>
-          <Link href="/login" className="flex items-center gap-2 rounded-full bg-linear-to-r from-red-600 to-red-700 px-6 py-3 text-sm font-semibold text-white shadow-lg transition-all hover:scale-105 hover:shadow-xl sm:px-8 sm:py-3.5">
-            <span className="select-none">🎄</span>
+          <Link href="/login" className="group flex items-center gap-2 rounded-full border-2 border-[#d4c494]/40 bg-[#d4c494]/5 px-6 py-2.5 text-sm font-medium text-[#d4c494] backdrop-blur-sm transition-all hover:border-[#d4c494]/70 hover:bg-[#d4c494]/10 sm:px-8 sm:py-3">
+            <span className="select-none text-base transition-transform group-hover:scale-110">🎄</span>
             <span>Giriş Yap</span>
           </Link>
         </div>
@@ -78,7 +78,7 @@ export default function Home() {
                 <span className="text-white ">YILDIZLI AĞAÇ</span>
               </h2>
               <p className="text-lg text-gray-300 sm:text-xl">
-                Bu yılbaşı sezonu arkadaşlarınla hediye alışverişi yap!
+                Yılbaşı 2026 sezonu arkadaşlarınla hediye alışverişi yap!
               </p>
             </div>
 
@@ -115,9 +115,9 @@ export default function Home() {
             </div>
 
             <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
-              <button className="rounded-full bg-linear-to-r from-[#4a6b5a] to-[#5a7b6a] px-8 py-4 text-lg font-semibold text-white shadow-lg transition-all hover:scale-105 hover:shadow-xl">
+              <Link href="/signup" className="rounded-full bg-linear-to-r from-[#4a6b5a] to-[#5a7b6a] px-8 py-4 text-lg font-semibold text-white shadow-lg transition-all hover:scale-105 hover:shadow-xl text-center">
                 Katıl
-              </button>
+              </Link>
               <button className="rounded-full border-2 border-[#d4c494]/50 px-8 py-4 text-lg font-semibold text-[#d4c494] transition-all hover:border-[#d4c494] hover:bg-[#d4c494]/10">
                 Nasıl Çalışır?
               </button>
@@ -168,7 +168,7 @@ export default function Home() {
 
       {/* Footer */}
       <footer className="container relative z-10 mx-auto px-4 py-8 text-center text-sm text-gray-500 sm:px-6 lg:px-8">
-        <p>Yıldız Teknik Üniversitesi Öğrenci Topluluğu • 2025</p>
+        <p>Yıldız Teknik Üniversitesi Öğrenci Topluluğu • 2026</p>
       </footer>
       </div>
     </div>

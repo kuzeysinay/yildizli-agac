@@ -111,9 +111,9 @@ export default function LoginPage() {
 
                 <div className="mt-6 text-center text-sm text-gray-400">
                   Hesabın yok mu?{" "}
-                  <a href="#" className="text-[#d4c494] hover:text-[#e4d4a4] transition-colors font-semibold">
+                  <Link href="/signup" className="text-[#d4c494] hover:text-[#e4d4a4] transition-colors font-semibold">
                     Kayıt Ol
-                  </a>
+                  </Link>
                 </div>
               </div>
             </div>
@@ -122,7 +122,7 @@ export default function LoginPage() {
 
         {/* Footer */}
         <footer className="container relative z-10 mx-auto px-4 py-8 text-center text-sm text-gray-500 sm:px-6 lg:px-8">
-          <p>Yıldız Teknik Üniversitesi Öğrenci Topluluğu • 2025</p>
+          <p>Yıldız Teknik Üniversitesi Öğrenci Topluluğu • 2026</p>
         </footer>
       </div>
     </div>
