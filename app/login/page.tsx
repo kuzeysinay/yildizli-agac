@@ -2,12 +2,15 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,6 +27,7 @@ export default function LoginPage() {
     try {
       const response = await fetch("https://api.yildizliagac.com/api/v1/auth/login", {
         method: "POST",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
         },
@@ -46,7 +50,7 @@ export default function LoginPage() {
         }
 
         // Login successful - redirect to profile page
-        window.location.href = "/profile";
+        router.push("/profile");
       } else {
         // Login failed
         setError(result.message || "Giriş başarısız oldu. Email ve şifrenizi kontrol ediniz.");
@@ -147,16 +151,39 @@ export default function LoginPage() {
                     <label htmlFor="password" className="mb-2 block text-sm font-medium text-[#d4c494]">
                       Şifre
                     </label>
-                    <input
-                      type="password"
-                      id="password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      placeholder="••••••••"
-                      className="w-full rounded-lg border border-[#4a6b5a]/50 bg-[#0a1810]/50 px-4 py-3 text-white placeholder-gray-500 transition-colors focus:border-[#4a6b5a] focus:outline-none focus:ring-2 focus:ring-[#4a6b5a]/20 disabled:opacity-50 disabled:cursor-not-allowed"
-                      required
-                      disabled={isSubmitting}
-                    />
+                    <div className="relative">
+                      <input
+                        type={showPassword ? "text" : "password"}
+                        id="password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        placeholder="••••••••"
+                        className="w-full rounded-lg border border-[#4a6b5a]/50 bg-[#0a1810]/50 pr-12 pl-4 py-3 text-white placeholder-gray-500 transition-colors focus:border-[#4a6b5a] focus:outline-none focus:ring-2 focus:ring-[#4a6b5a]/20 disabled:opacity-50 disabled:cursor-not-allowed"
+                        required
+                        disabled={isSubmitting}
+                        autoComplete="current-password"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword((prev) => !prev)}
+                        aria-label={showPassword ? "Şifreyi gizle" : "Şifreyi göster"}
+                        className="absolute inset-y-0 right-0 flex items-center justify-center px-3 text-gray-400 hover:text-gray-200 transition-colors disabled:opacity-50"
+                        disabled={isSubmitting}
+                      >
+                        {showPassword ? (
+                          // Eye-off icon
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M3 3l18 18M10.477 10.485a3 3 0 104.243 4.243M9.88 4.607A9.953 9.953 0 0112 4c5.523 0 10 4.477 10 10 0 1.508-.333 2.939-.93 4.224M6.228 6.228C4.86 7.32 3.78 8.77 3 10c2.137 3.4 5.317 6 9 6 1.042 0 2.046-.168 2.988-.48" />
+                          </svg>
+                        ) : (
+                          // Eye icon
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                          </svg>
+                        )}
+                      </button>
+                    </div>
                   </div>
 
                   <div className="flex items-center justify-between text-sm">

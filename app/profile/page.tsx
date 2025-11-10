@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function ProfilePage() {
   // TODO: This would come from authentication/database
@@ -12,6 +14,34 @@ export default function ProfilePage() {
     hasMatch: true,
     matchRevealed: true,
   };
+
+  const router = useRouter();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  async function handleLogout() {
+    if (isLoggingOut) return;
+    setIsLoggingOut(true);
+    try {
+      const response = await fetch("https://api.yildizliagac.com/api/v1/auth/logout", {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Accept": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        // Best-effort: still navigate to login on non-OK, since session might be invalid anyway
+        console.error("Logout failed with status:", response.status);
+      }
+    } catch (error) {
+      console.error("Logout request error:", error);
+      // Even on error, proceed to login to force re-auth
+    } finally {
+      router.push("/login");
+      setIsLoggingOut(false);
+    }
+  }
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-linear-to-b from-[#0a1810] via-[#0d1f18] to-[#0a1810] text-white font-(family-name:--font-work-sans)">
@@ -39,12 +69,19 @@ export default function ProfilePage() {
       <div className="relative z-10">
         {/* Header */}
         <header className="container relative z-10 mx-auto px-4 py-6 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between">
-            <Link href="/" className="text-2xl sm:text-3xl font-bold hover:opacity-80 transition-opacity">
-              <span className="select-none">🎄</span> YILDIZLI AĞAÇ
-            </Link>
-            <button className="rounded-full border-2 border-red-600/50 px-6 py-2 text-sm font-semibold text-red-400 transition-all hover:border-red-600 hover:bg-red-600/10">
-              Çıkış Yap
+          <div className="flex items-center justify-between gap-3">
+            <div className="min-w-0 flex-1">
+              <Link href="/" className="block truncate whitespace-nowrap text-2xl sm:text-3xl font-bold hover:opacity-80 transition-opacity">
+                <span className="select-none">🎄</span> YILDIZLI AĞAÇ
+              </Link>
+            </div>
+            <button
+              onClick={handleLogout}
+              disabled={isLoggingOut}
+              aria-disabled={isLoggingOut}
+              className="shrink-0 rounded-full border-2 border-red-600/50 px-6 py-2 text-sm font-semibold text-red-400 transition-all hover:border-red-600 hover:bg-red-600/10 disabled:opacity-60 disabled:cursor-not-allowed w-32 sm:w-auto"
+            >
+              {isLoggingOut ? "Çıkış Yapılıyor..." : "Çıkış Yap"}
             </button>
           </div>
         </header>
