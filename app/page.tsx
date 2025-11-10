@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 
 export default function Home() {
   return (
@@ -45,30 +46,38 @@ export default function Home() {
 
       {/* Main Content */}
       <main className="container relative z-10 mx-auto px-4 py-8 sm:px-6 lg:px-8">
-        <div className="flex flex-col items-center justify-center gap-8 lg:gap-12">
+        <div className="flex flex-col items-center justify-center gap-6 sm:gap-8 lg:gap-10">
           
           {/* Christmas Tree - Main Focus */}
-          <div className="relative flex flex-col items-center scale-110 sm:scale-125 lg:scale-150 py-8 lg:py-12 select-none">
-            {/* Star on top */}
-            <div className="mb-3 text-7xl sm:text-8xl animate-pulse drop-shadow-[0_0_15px_rgba(212,196,148,0.6)]">⭐</div>
-            
-            {/* Tree */}
-            <div className="relative">
-              <div className="flex flex-col items-center gap-1">
-                {/* Tree layers - much bigger */}
-                <div className="text-9xl sm:text-[12rem] leading-none text-[#4a6b5a] drop-shadow-2xl filter brightness-110">🌲</div>
+          <div className="relative flex flex-col items-center px-2 pt-4 pb-6 sm:px-6 sm:pt-6 sm:pb-8 select-none">
+            {/* Soft radial glow behind the SVG to blend with background */}
+            <div className="pointer-events-none absolute inset-0 -z-10 mx-auto max-w-[480px] bg-[radial-gradient(ellipse_at_center,rgba(212,196,148,0.22),rgba(17,31,25,0)_60%)] blur-2xl" />
+             
+             {/* Tree */}
+             <div className="relative">
+               <div className="flex flex-col items-center gap-1">
+                 {/* Tree image */}
+                 <Image
+                  src="/hello.svg"
+                  alt="Yıldızlı Ağaç"
+                  width={420}
+                  height={398}
+                  className="drop-shadow-2xl max-w-[320px] w-full sm:max-w-[380px] lg:max-w-[420px] h-auto"
+                  priority
+                  sizes="(max-width: 640px) 320px, (max-width: 1024px) 380px, 420px"
+                />
               </div>
             </div>
-
+ 
             {/* Decorative elements around tree */}
-            <div className="absolute -left-12 sm:-left-16 top-1/2 text-4xl sm:text-5xl opacity-50 animate-pulse" style={{animationDelay: '0.5s'}}>⭐</div>
-            <div className="absolute -right-12 sm:-right-16 top-1/3 text-3xl sm:text-4xl opacity-50 animate-pulse" style={{animationDelay: '1s'}}>⭐</div>
-            <div className="absolute -left-8 sm:-left-12 top-1/4 text-3xl sm:text-4xl opacity-40 animate-pulse" style={{animationDelay: '1.5s'}}>⭐</div>
-            <div className="absolute -right-8 sm:-right-12 top-2/3 text-3xl sm:text-4xl opacity-40 animate-pulse" style={{animationDelay: '2s'}}>⭐</div>
+            <div className="absolute -left-6 sm:-left-8 top-1/2 text-2xl sm:text-3xl opacity-40 animate-pulse" style={{animationDelay: '0.5s'}}>⭐</div>
+            <div className="absolute -right-6 sm:-right-8 top-1/3 text-2xl sm:text-3xl opacity-40 animate-pulse" style={{animationDelay: '1s'}}>⭐</div>
+            <div className="absolute -left-4 sm:-left-6 top-1/4 text-xl sm:text-2xl opacity-40 animate-pulse" style={{animationDelay: '1.5s'}}>⭐</div>
+            <div className="absolute -right-4 sm:-right-6 top-2/3 text-xl sm:text-2xl opacity-40 animate-pulse" style={{animationDelay: '2s'}}>⭐</div>
           </div>
 
           {/* Content Below Tree */}
-          <div className="flex max-w-2xl flex-col gap-8 text-center">
+          <div className="flex max-w-2xl -mt-2 sm:mt-0 flex-col gap-6 sm:gap-7 text-center">
             <div>
               <h2 className="mb-4 text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
                 <span className="font-(family-name:--font-graduate) bg-linear-to-r from-[#9db89d] to-[#c4d4a6] bg-clip-text text-transparent text-6xl sm:text-7xl lg:text-8xl">

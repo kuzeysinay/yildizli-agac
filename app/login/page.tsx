@@ -6,11 +6,57 @@ import Link from "next/link";
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Implement authentication logic
-    console.log("Login attempted with:", { email, password });
+    setError(null);
+
+    // Basic validation
+    if (!email || !password) {
+      setError("Lütfen email ve şifrenizi giriniz.");
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const response = await fetch("https://api.yildizliagac.com/api/v1/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email,
+          password,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (response.ok && result.success) {
+        // Store token if provided
+        if (result.data?.token) {
+          localStorage.setItem("token", result.data.token);
+        }
+        // Store user data if provided
+        if (result.data?.user) {
+          localStorage.setItem("user", JSON.stringify(result.data.user));
+        }
+
+        // Login successful - redirect to profile page
+        window.location.href = "/profile";
+      } else {
+        // Login failed
+        setError(result.message || "Giriş başarısız oldu. Email ve şifrenizi kontrol ediniz.");
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+      setError("Bir hata oluştu. Lütfen daha sonra tekrar deneyin.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -58,6 +104,29 @@ export default function LoginPage() {
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-6">
+                  {/* Error Message */}
+                  {error && (
+                    <div className="rounded-lg border-2 border-red-600/50 bg-red-600/10 p-4">
+                      <div className="flex items-start gap-3">
+                        <svg className="h-5 w-5 flex-shrink-0 text-red-400 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <div className="flex-1">
+                          <p className="text-sm font-medium text-red-400">{error}</p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setError(null)}
+                          className="text-red-400 hover:text-red-300 transition-colors"
+                        >
+                          <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
                   <div>
                     <label htmlFor="email" className="mb-2 block text-sm font-medium text-[#d4c494]">
                       E-posta Adresi
@@ -68,8 +137,9 @@ export default function LoginPage() {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="ogrenci@std.yildiz.edu.tr"
-                      className="w-full rounded-lg border border-[#4a6b5a]/50 bg-[#0a1810]/50 px-4 py-3 text-white placeholder-gray-500 transition-colors focus:border-[#4a6b5a] focus:outline-none focus:ring-2 focus:ring-[#4a6b5a]/20"
+                      className="w-full rounded-lg border border-[#4a6b5a]/50 bg-[#0a1810]/50 px-4 py-3 text-white placeholder-gray-500 transition-colors focus:border-[#4a6b5a] focus:outline-none focus:ring-2 focus:ring-[#4a6b5a]/20 disabled:opacity-50 disabled:cursor-not-allowed"
                       required
+                      disabled={isSubmitting}
                     />
                   </div>
 
@@ -83,8 +153,9 @@ export default function LoginPage() {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="••••••••"
-                      className="w-full rounded-lg border border-[#4a6b5a]/50 bg-[#0a1810]/50 px-4 py-3 text-white placeholder-gray-500 transition-colors focus:border-[#4a6b5a] focus:outline-none focus:ring-2 focus:ring-[#4a6b5a]/20"
+                      className="w-full rounded-lg border border-[#4a6b5a]/50 bg-[#0a1810]/50 px-4 py-3 text-white placeholder-gray-500 transition-colors focus:border-[#4a6b5a] focus:outline-none focus:ring-2 focus:ring-[#4a6b5a]/20 disabled:opacity-50 disabled:cursor-not-allowed"
                       required
+                      disabled={isSubmitting}
                     />
                   </div>
 
@@ -92,7 +163,8 @@ export default function LoginPage() {
                     <label className="flex items-center">
                       <input
                         type="checkbox"
-                        className="mr-2 h-4 w-4 rounded border-[#4a6b5a]/50 bg-[#0a1810]/50 text-[#4a6b5a] focus:ring-2 focus:ring-[#4a6b5a]/20"
+                        className="mr-2 h-4 w-4 rounded border-[#4a6b5a]/50 bg-[#0a1810]/50 text-[#4a6b5a] focus:ring-2 focus:ring-[#4a6b5a]/20 disabled:opacity-50"
+                        disabled={isSubmitting}
                       />
                       <span className="text-gray-400">Beni hatırla</span>
                     </label>
@@ -103,9 +175,17 @@ export default function LoginPage() {
 
                   <button
                     type="submit"
-                    className="w-full rounded-full bg-linear-to-r from-[#4a6b5a] to-[#5a7b6a] px-8 py-4 text-lg font-semibold text-white shadow-lg transition-all hover:scale-105 hover:shadow-xl"
+                    disabled={isSubmitting}
+                    className="w-full flex items-center justify-center gap-2 rounded-full bg-linear-to-r from-[#4a6b5a] to-[#5a7b6a] px-8 py-4 text-lg font-semibold text-white shadow-lg transition-all hover:scale-105 hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                   >
-                    Giriş Yap
+                    {isSubmitting ? (
+                      <>
+                        <div className="h-5 w-5 animate-spin rounded-full border-2 border-white/30 border-t-white"></div>
+                        <span>Giriş yapılıyor...</span>
+                      </>
+                    ) : (
+                      "Giriş Yap"
+                    )}
                   </button>
                 </form>
 
