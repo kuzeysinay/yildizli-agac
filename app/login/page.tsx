@@ -10,6 +10,7 @@ export default function LoginPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -34,6 +35,7 @@ export default function LoginPage() {
         body: JSON.stringify({
           email,
           password,
+          rememberMe,
         }),
       });
 
@@ -192,6 +194,8 @@ export default function LoginPage() {
                         type="checkbox"
                         className="mr-2 h-4 w-4 rounded border-[#4a6b5a]/50 bg-[#0a1810]/50 text-[#4a6b5a] focus:ring-2 focus:ring-[#4a6b5a]/20 disabled:opacity-50"
                         disabled={isSubmitting}
+                        checked={rememberMe}
+                        onChange={(e) => setRememberMe(e.target.checked)}
                       />
                       <span className="text-gray-400">Beni hatırla</span>
                     </label>

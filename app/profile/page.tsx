@@ -1,42 +1,104 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 export default function ProfilePage() {
-  // TODO: This would come from authentication/database
-  const user = {
-    firstName: "Ahmet",
-    lastName: "Yılmaz",
-    email: "ahmet.yilmaz@std.yildiz.edu.tr",
-    gender: "erkek",
-    hasMatch: true,
-    matchRevealed: true,
+  type CurrentUser = {
+    id: number;
+    userId: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    createdAt: string;
+    lastLogin: string;
+    approved: boolean;
   };
+
+  const [currentUser, setCurrentUser] = useState<CurrentUser | null>(null);
+  const [isLoadingUser, setIsLoadingUser] = useState(true);
+  const [userError, setUserError] = useState<string | null>(null);
 
   const router = useRouter();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      setIsLoadingUser(true);
+      try {
+        // Get token from localStorage
+        const token = localStorage.getItem("token");
+        
+        const headers: HeadersInit = {
+          "Accept": "application/json",
+        };
+        
+        // Add Authorization header if token exists
+        if (token) {
+          headers["Authorization"] = `Bearer ${token}`;
+        }
+        
+        const res = await fetch("https://api.yildizliagac.com/api/v1/users/getCurrentUser", {
+          method: "GET",
+          credentials: "include",
+          headers,
+        });
+        const data = await res.json().catch(() => null);
+        if (cancelled) return;
+        if (res.ok && data?.success && data?.data) {
+          setCurrentUser(data.data as CurrentUser);
+          setUserError(null);
+        } else {
+          setUserError(data?.message || "Kullanıcı bilgileri alınamadı");
+        }
+      } catch (e) {
+        if (!cancelled) setUserError("Ağ hatası: Kullanıcı bilgileri alınamadı");
+      } finally {
+        if (!cancelled) setIsLoadingUser(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   async function handleLogout() {
     if (isLoggingOut) return;
     setIsLoggingOut(true);
     try {
+      // Get token from localStorage
+      const token = localStorage.getItem("token");
+      
+      const headers: HeadersInit = {
+        "Accept": "application/json",
+      };
+      
+      // Add Authorization header if token exists
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
+      
       const response = await fetch("https://api.yildizliagac.com/api/v1/auth/logout", {
         method: "POST",
         credentials: "include",
-        headers: {
-          "Accept": "application/json",
-        },
+        headers,
       });
 
       if (!response.ok) {
         // Best-effort: still navigate to login on non-OK, since session might be invalid anyway
         console.error("Logout failed with status:", response.status);
       }
+      
+      // Clear token from localStorage on logout
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
     } catch (error) {
       console.error("Logout request error:", error);
-      // Even on error, proceed to login to force re-auth
+      // Even on error, clear local storage and proceed to login to force re-auth
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
     } finally {
       router.push("/login");
       setIsLoggingOut(false);
@@ -92,39 +154,49 @@ export default function ProfilePage() {
             {/* Profile Header */}
             <div className="mb-8 text-center">
               <div className="mb-4 inline-flex h-24 w-24 items-center justify-center rounded-full bg-linear-to-br from-[#4a6b5a] to-[#5a7b6a] text-5xl select-none">
-                {user.gender === "erkek" ? "♂️" : user.gender === "kadin" ? "♀️" : "⚧️"}
+                🎄
               </div>
-              <h1 className="mb-2 text-4xl font-bold">
-                {user.firstName} {user.lastName}
-              </h1>
-              <p className="text-gray-400">{user.email}</p>
+              {isLoadingUser ? (
+                <>
+                  <div className="mb-2 flex justify-center">
+                    <div className="skeleton skeleton-text w-64 h-10 max-w-full"></div>
+                  </div>
+                  <div className="flex justify-center">
+                    <div className="skeleton skeleton-text w-48 h-5 max-w-full"></div>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <h1 className="mb-2 text-4xl font-bold">
+                    {currentUser ? `${currentUser.firstName} ${currentUser.lastName}` : "Misafir"}
+                  </h1>
+                  <p className="text-gray-400">
+                    {currentUser?.email || ""}
+                  </p>
+                </>
+              )}
+              {userError && (
+                <p className="mt-2 text-sm text-red-400">{userError}</p>
+              )}
             </div>
 
             {/* Match Status Card */}
             <div className="mb-6 rounded-2xl border border-[#4a6b5a]/30 bg-linear-to-br from-[#1a2f25]/50 to-[#0f1f18]/50 p-8 backdrop-blur-sm">
               <div className="flex flex-col items-center text-center">
                 <div className="mb-6 text-8xl select-none">
-                  {user.hasMatch ? "🎄" : "⏳"}
+                  🎄
                 </div>
                 <h2 className="mb-2 text-2xl font-bold">Eşleşme Durumu</h2>
-                {user.hasMatch ? (
-                  <>
-                    <p className="mb-6 text-gray-400">
-                      Eşleşmen tamamlandı! 🎉
-                    </p>
-                    <Link
-                      href="/match"
-                      className="inline-flex items-center gap-2 rounded-full bg-linear-to-r from-[#4a6b5a] to-[#5a7b6a] px-8 py-3 text-lg font-semibold text-white shadow-lg transition-all hover:scale-105 hover:shadow-xl"
-                    >
-                      <span className="select-none">🎁</span>
-                      <span>Eşleşmeni Gör</span>
-                    </Link>
-                  </>
-                ) : (
-                  <p className="text-gray-400 max-w-md">
-                    Henüz eşleşme gerçekleşmedi. Eşleşme tarihi yaklaştıkça burada görebileceksin.
-                  </p>
-                )}
+                <p className="mb-6 text-gray-400 max-w-md">
+                  Eşleşmen tamamlandı! 🎉
+                </p>
+                <Link
+                  href="/match"
+                  className="inline-flex items-center gap-2 rounded-full bg-linear-to-r from-[#4a6b5a] to-[#5a7b6a] px-8 py-3 text-lg font-semibold text-white shadow-lg transition-all hover:scale-105 hover:shadow-xl"
+                >
+                  <span className="select-none">🎁</span>
+                  <span>Eşleşmeni Gör</span>
+                </Link>
               </div>
             </div>
 
@@ -134,23 +206,33 @@ export default function ProfilePage() {
               <div className="space-y-4">
                 <div className="flex items-center justify-between border-b border-[#4a6b5a]/20 pb-4">
                   <span className="text-gray-400">Ad Soyad</span>
-                  <span className="font-semibold">{user.firstName} {user.lastName}</span>
+                  {isLoadingUser ? (
+                    <div className="skeleton skeleton-text w-32 h-5"></div>
+                  ) : (
+                    <span className="font-semibold">
+                      {currentUser ? `${currentUser.firstName} ${currentUser.lastName}` : "-"}
+                    </span>
+                  )}
                 </div>
                 <div className="flex items-center justify-between border-b border-[#4a6b5a]/20 pb-4">
                   <span className="text-gray-400">E-posta</span>
-                  <span className="font-semibold">{user.email}</span>
-                </div>
-                <div className="flex items-center justify-between border-b border-[#4a6b5a]/20 pb-4">
-                  <span className="text-gray-400">Cinsiyet</span>
-                  <span className="font-semibold">
-                    {user.gender === "erkek" ? "♂️ Erkek" : user.gender === "kadin" ? "♀️ Kadın" : "⚧️ Diğer"}
-                  </span>
+                  {isLoadingUser ? (
+                    <div className="skeleton skeleton-text w-40 h-5"></div>
+                  ) : (
+                    <span className="font-semibold">
+                      {currentUser?.email || "-"}
+                    </span>
+                  )}
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-gray-400">Üyelik Durumu</span>
-                  <span className="rounded-full bg-green-500/20 px-4 py-1 text-sm font-semibold text-green-400">
-                    Aktif
-                  </span>
+                  {isLoadingUser ? (
+                    <div className="skeleton skeleton-text w-20 h-6 rounded-full"></div>
+                  ) : (
+                    <span className="rounded-full bg-green-500/20 px-4 py-1 text-sm font-semibold text-green-400">
+                      {currentUser?.approved ? "Aktif" : "Onay Bekliyor"}
+                    </span>
+                  )}
                 </div>
               </div>
             </div>

@@ -1,7 +1,45 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
+import { useEffect, useState } from "react";
 
 export default function Home() {
+  const [isAuth, setIsAuth] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        // Get token from localStorage
+        const token = localStorage.getItem("token");
+        
+        const headers: HeadersInit = {
+          "Accept": "application/json",
+        };
+        
+        // Add Authorization header if token exists
+        if (token) {
+          headers["Authorization"] = `Bearer ${token}`;
+        }
+        
+        const res = await fetch("https://api.yildizliagac.com/api/v1/users/getCurrentUser", {
+          method: "GET",
+          credentials: "include",
+          headers,
+        });
+        if (cancelled) return;
+        const data = await res.json().catch(() => null);
+        setIsAuth(res.ok && data?.success === true && !!data?.data);
+      } catch {
+        if (!cancelled) setIsAuth(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   return (
     <div className="relative min-h-screen overflow-hidden bg-linear-to-b from-[#0a1810] via-[#0d1f18] to-[#0a1810] text-white font-(family-name:--font-work-sans)">
       {/* Background Layer - Snowflakes */}
@@ -37,10 +75,30 @@ export default function Home() {
       <header className="container relative z-10 mx-auto px-4 py-6 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between">
           <div className="w-24 sm:w-32"></div>
-          <Link href="/login" className="group flex items-center gap-2 rounded-full border-2 border-[#d4c494]/40 bg-[#d4c494]/5 px-6 py-2.5 text-sm font-medium text-[#d4c494] backdrop-blur-sm transition-all hover:border-[#d4c494]/70 hover:bg-[#d4c494]/10 sm:px-8 sm:py-3">
-            <span className="select-none text-base transition-transform group-hover:scale-110">🎄</span>
-            <span>Giriş Yap</span>
-          </Link>
+          {isAuth ? (
+            <Link href="/profile" className="group flex items-center gap-2 rounded-full border-2 border-[#d4c494]/40 bg-[#d4c494]/5 px-6 py-2.5 text-sm font-medium text-[#d4c494] backdrop-blur-sm transition-all hover:border-[#d4c494]/70 hover:bg-[#d4c494]/10 sm:px-8 sm:py-3">
+              <svg 
+                className="h-5 w-5 transition-transform group-hover:scale-110" 
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+              >
+                <path 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round" 
+                  strokeWidth={2} 
+                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" 
+                />
+              </svg>
+              <span>Profil</span>
+            </Link>
+          ) : (
+            <Link href="/login" className="group flex items-center gap-2 rounded-full border-2 border-[#d4c494]/40 bg-[#d4c494]/5 px-6 py-2.5 text-sm font-medium text-[#d4c494] backdrop-blur-sm transition-all hover:border-[#d4c494]/70 hover:bg-[#d4c494]/10 sm:px-8 sm:py-3">
+              <span className="select-none text-base transition-transform group-hover:scale-110">🎄</span>
+              <span>Giriş Yap</span>
+            </Link>
+          )}
         </div>
       </header>
 

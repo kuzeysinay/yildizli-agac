@@ -98,3 +98,48 @@ body {
 .interest-scroll::-webkit-scrollbar-thumb:hover {
   background: rgba(74, 107, 90, 0.7);
 }
+
+/* Hide scrollbar for time picker */
+.time-picker-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.time-picker-scroll {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Skeleton Loading Animation */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(74, 107, 90, 0.08) 0%,
+    rgba(74, 107, 90, 0.18) 25%,
+    rgba(74, 107, 90, 0.25) 50%,
+    rgba(74, 107, 90, 0.18) 75%,
+    rgba(74, 107, 90, 0.08) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+  border-radius: 4px;
+  position: relative;
+  overflow: hidden;
+}
+
+.skeleton-text {
+  height: 1.2em;
+  border-radius: 4px;
+}
+
+.skeleton-circle {
+  border-radius: 50%;
+}
