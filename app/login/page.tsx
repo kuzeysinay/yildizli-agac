@@ -92,7 +92,7 @@ export default function LoginPage() {
         {/* Header */}
         <header className="container relative z-10 mx-auto px-4 py-6 sm:px-6 lg:px-8">
           <div className="flex items-center justify-center">
-            <Link href="/" className="text-2xl sm:text-3xl font-bold hover:opacity-80 transition-opacity">
+            <Link href="/" className="text-2xl sm:text-3xl font-bold hover:opacity-80 transition-opacity" style={{ fontFamily: 'var(--font-modak), "Modak", cursive', fontWeight: 400 }}>
               <span className="select-none">🎄</span> YILDIZLI AĞAÇ
             </Link>
           </div>

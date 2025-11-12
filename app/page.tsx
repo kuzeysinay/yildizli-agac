@@ -18,11 +18,6 @@ export default function Home() {
           "Accept": "application/json",
         };
         
-        // Add Authorization header if token exists
-        if (token) {
-          headers["Authorization"] = `Bearer ${token}`;
-        }
-        
         const res = await fetch("https://api.yildizliagac.com/api/v1/users/getCurrentUser", {
           method: "GET",
           credentials: "include",
@@ -72,7 +67,7 @@ export default function Home() {
       {/* Content Layer */}
       <div className="relative z-10">
       {/* Header */}
-      <header className="container relative z-10 mx-auto px-4 py-6 sm:px-6 lg:px-8">
+      <header className="container relative z-10 mx-auto px-4 py-3 sm:px-6 sm:py-4 lg:px-8 lg:py-6">
         <div className="flex items-center justify-between">
           <div className="w-24 sm:w-32"></div>
           {isAuth ? (
@@ -103,89 +98,117 @@ export default function Home() {
       </header>
 
       {/* Main Content */}
-      <main className="container relative z-10 mx-auto px-4 py-8 sm:px-6 lg:px-8">
-        <div className="flex flex-col items-center justify-center gap-6 sm:gap-8 lg:gap-10">
-          
-          {/* Christmas Tree - Main Focus */}
-          <div className="relative flex flex-col items-center px-2 pt-4 pb-6 sm:px-6 sm:pt-6 sm:pb-8 select-none">
-            {/* Soft radial glow behind the SVG to blend with background */}
-            <div className="pointer-events-none absolute inset-0 -z-10 mx-auto max-w-[480px] bg-[radial-gradient(ellipse_at_center,rgba(212,196,148,0.22),rgba(17,31,25,0)_60%)] blur-2xl" />
-             
-             {/* Tree */}
-             <div className="relative">
-               <div className="flex flex-col items-center gap-1">
-                 {/* Tree image */}
-                 <Image
-                  src="/hello.svg"
-                  alt="Yıldızlı Ağaç"
-                  width={420}
-                  height={398}
-                  className="drop-shadow-2xl max-w-[320px] w-full sm:max-w-[380px] lg:max-w-[420px] h-auto"
-                  priority
-                  sizes="(max-width: 640px) 320px, (max-width: 1024px) 380px, 420px"
-                />
-              </div>
+      <main className="relative z-10">
+        {/* Christmas Tree - Main Focus - Hero Section */}
+        <div className="relative flex flex-col items-center justify-center px-2 pt-2 pb-0 sm:px-4 sm:pt-4 sm:pb-2 lg:px-4 lg:pt-6 lg:pb-4 select-none w-full">
+          {/* Soft radial glow behind the SVG to blend with background */}
+          <div className="pointer-events-none absolute inset-0 -z-10 mx-auto w-full max-w-[85vw] sm:max-w-[75vw] lg:max-w-[70vw] bg-[radial-gradient(ellipse_at_center,rgba(212,196,148,0.22),rgba(17,31,25,0)_60%)] blur-2xl" />
+           
+           {/* Tree */}
+           <div className="relative w-full flex justify-center">
+             <div className="flex flex-col items-center gap-1 w-full">
+               {/* Tree image - Large on mobile, optimized for desktop */}
+               <Image
+                src="/hello.svg"
+                alt="Yıldızlı Ağaç"
+                width={1000}
+                height={950}
+                className="drop-shadow-2xl w-[80vw] sm:w-[60vw] md:w-[55vw] lg:w-[50vw] xl:w-[45vw] 2xl:w-[42vw] max-w-none sm:max-w-[600px] h-auto"
+                priority
+                sizes="(max-width: 640px) 80vw, (max-width: 768px) 60vw, (max-width: 1024px) 55vw, (max-width: 1280px) 50vw, 45vw"
+              />
             </div>
- 
-            {/* Decorative elements around tree */}
-            <div className="absolute -left-6 sm:-left-8 top-1/2 text-2xl sm:text-3xl opacity-40 animate-pulse" style={{animationDelay: '0.5s'}}>⭐</div>
-            <div className="absolute -right-6 sm:-right-8 top-1/3 text-2xl sm:text-3xl opacity-40 animate-pulse" style={{animationDelay: '1s'}}>⭐</div>
-            <div className="absolute -left-4 sm:-left-6 top-1/4 text-xl sm:text-2xl opacity-40 animate-pulse" style={{animationDelay: '1.5s'}}>⭐</div>
-            <div className="absolute -right-4 sm:-right-6 top-2/3 text-xl sm:text-2xl opacity-40 animate-pulse" style={{animationDelay: '2s'}}>⭐</div>
           </div>
+ 
+          {/* Decorative elements around tree */}
+          <div className="absolute left-[2%] sm:left-[5%] md:left-[8%] lg:left-[12%] top-1/2 text-2xl sm:text-3xl md:text-4xl lg:text-5xl opacity-40 animate-pulse" style={{animationDelay: '0.5s'}}>⭐</div>
+          <div className="absolute right-[2%] sm:right-[5%] md:right-[8%] lg:right-[12%] top-1/3 text-2xl sm:text-3xl md:text-4xl lg:text-5xl opacity-40 animate-pulse" style={{animationDelay: '1s'}}>⭐</div>
+          <div className="absolute left-[3%] sm:left-[8%] md:left-[10%] lg:left-[14%] top-1/4 text-xl sm:text-2xl md:text-3xl lg:text-4xl opacity-40 animate-pulse" style={{animationDelay: '1.5s'}}>⭐</div>
+          <div className="absolute right-[3%] sm:right-[8%] md:right-[10%] lg:right-[14%] top-2/3 text-xl sm:text-2xl md:text-3xl lg:text-4xl opacity-40 animate-pulse" style={{animationDelay: '2s'}}>⭐</div>
+        </div>
 
-          {/* Content Below Tree */}
-          <div className="flex max-w-2xl -mt-2 sm:mt-0 flex-col gap-6 sm:gap-7 text-center">
-            <div>
-              <h2 className="mb-4 text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
-                <span className="font-(family-name:--font-graduate) bg-linear-to-r from-[#9db89d] to-[#c4d4a6] bg-clip-text text-transparent text-6xl sm:text-7xl lg:text-8xl">
+        {/* Content Below Tree - Overlapping with image */}
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex max-w-2xl mx-auto -mt-8 sm:-mt-12 lg:-mt-16 flex-col gap-2 sm:gap-3 lg:gap-4 text-center relative z-20">
+            <div className="relative">
+              <h2 className="mb-1 sm:mb-2 text-3xl sm:text-4xl font-bold tracking-tight lg:text-5xl xl:text-6xl">
+                <span 
+                  className="font-(family-name:--font-graduate) text-[#d4c494] text-5xl sm:text-7xl lg:text-8xl xl:text-9xl relative inline-block"
+                  style={{
+                    textShadow: `
+                      -3px -3px 0 #4a6b5a,
+                      3px -3px 0 #4a6b5a,
+                      -3px 3px 0 #4a6b5a,
+                      3px 3px 0 #4a6b5a,
+                      -2px -2px 0 #4a6b5a,
+                      2px -2px 0 #4a6b5a,
+                      -2px 2px 0 #4a6b5a,
+                      2px 2px 0 #4a6b5a,
+                      -1px -1px 0 #4a6b5a,
+                      1px -1px 0 #4a6b5a,
+                      -1px 1px 0 #4a6b5a,
+                      1px 1px 0 #4a6b5a
+                    `,
+                    WebkitTextStroke: '2px #4a6b5a',
+                    paintOrder: 'stroke fill'
+                  }}
+                >
                   YTÜ
                 </span>
                 <br />
-                <span className="text-white ">YILDIZLI AĞAÇ</span>
+                <span 
+                  className="text-white text-5xl sm:text-5xl lg:text-6xl xl:text-7xl relative inline-block drop-shadow-lg"
+                  style={{
+                    fontFamily: 'var(--font-modak), "Modak", cursive',
+                    fontWeight: 400,
+                    letterSpacing: '0.02em'
+                  }}
+                >
+                  YILDIZLI AĞAÇ
+                </span>
               </h2>
-              <p className="text-lg text-gray-300 sm:text-xl">
-                Yılbaşı 2026 sezonu arkadaşlarınla hediye alışverişi yap!
+              <p className="text-sm sm:text-base text-gray-300 lg:text-lg mt-1 sm:mt-2 drop-shadow-md">
+                2026'ya girerken bir Yıldızlıyla hediye değiş-tokuşu yap!
               </p>
             </div>
 
-            <div className="space-y-4 mx-auto max-w-md">
-              <div className="flex items-start gap-3 text-left">
-                <span className="mt-1 text-xl select-none">🎁</span>
+            <div className="space-y-2 sm:space-y-3 mx-auto max-w-md mt-2 sm:mt-3">
+              <div className="flex items-start gap-2 sm:gap-3 text-left">
+                <span className="mt-0.5 sm:mt-1 text-lg sm:text-xl select-none">🎁</span>
                 <div>
-                  <h3 className="font-semibold text-[#d4c494]">Eşleşme Sistemi</h3>
-                  <p className="text-sm text-gray-400">
+                  <h3 className="font-semibold text-[#d4c494] text-sm sm:text-base">Eşleşme Sistemi</h3>
+                  <p className="text-xs sm:text-sm text-gray-400">
                     Otomatik olarak bir arkadaşınla eşleştirileceksin
                   </p>
                 </div>
               </div>
               
-              <div className="flex items-start gap-3 text-left">
-                <span className="mt-1 text-xl select-none">⭐</span>
+              <div className="flex items-start gap-2 sm:gap-3 text-left">
+                <span className="mt-0.5 sm:mt-1 text-lg sm:text-xl select-none">⭐</span>
                 <div>
-                  <h3 className="font-semibold text-[#d4c494]">Gizli Kalıyor</h3>
-                  <p className="text-sm text-gray-400">
+                  <h3 className="font-semibold text-[#d4c494] text-sm sm:text-base">Gizli Kalıyor</h3>
+                  <p className="text-xs sm:text-sm text-gray-400">
                     Kime hediye alacağın sadece sen bileceksin
                   </p>
                 </div>
               </div>
               
-              <div className="flex items-start gap-3 text-left">
-                <span className="mt-1 text-xl select-none">🎄</span>
+              <div className="flex items-start gap-2 sm:gap-3 text-left">
+                <span className="mt-0.5 sm:mt-1 text-lg sm:text-xl select-none">🎄</span>
                 <div>
-                  <h3 className="font-semibold text-[#d4c494]">Yılbaşı Sürprizi</h3>
-                  <p className="text-sm text-gray-400">
+                  <h3 className="font-semibold text-[#d4c494] text-sm sm:text-base">Yılbaşı Sürprizi</h3>
+                  <p className="text-xs sm:text-sm text-gray-400">
                     Hediyeni belirtilen tarihte teslim et ve sürprizi paylaş
                   </p>
                 </div>
               </div>
             </div>
 
-            <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
-              <Link href="/signup" className="rounded-full bg-linear-to-r from-[#4a6b5a] to-[#5a7b6a] px-8 py-4 text-lg font-semibold text-white shadow-lg transition-all hover:scale-105 hover:shadow-xl text-center">
+            <div className="flex flex-col gap-2 sm:gap-3 sm:flex-row sm:justify-center mt-3 sm:mt-4">
+              <Link href="/signup" className="rounded-full bg-linear-to-r from-[#4a6b5a] to-[#5a7b6a] px-6 py-3 sm:px-8 sm:py-4 text-base sm:text-lg font-semibold text-white shadow-lg transition-all hover:scale-105 hover:shadow-xl text-center">
                 Katıl
               </Link>
-              <button className="rounded-full border-2 border-[#d4c494]/50 px-8 py-4 text-lg font-semibold text-[#d4c494] transition-all hover:border-[#d4c494] hover:bg-[#d4c494]/10">
+              <button className="rounded-full border-2 border-[#d4c494]/50 px-6 py-3 sm:px-8 sm:py-4 text-base sm:text-lg font-semibold text-[#d4c494] transition-all hover:border-[#d4c494] hover:bg-[#d4c494]/10">
                 Nasıl Çalışır?
               </button>
             </div>
@@ -193,7 +216,8 @@ export default function Home() {
         </div>
 
         {/* Info Section */}
-        <div className="mx-auto mt-20 max-w-4xl">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="mx-auto mt-20 max-w-4xl">
           <div className="rounded-2xl border border-[#4a6b5a]/30 bg-linear-to-br from-[#1a2f25]/50 to-[#0f1f18]/50 p-8 backdrop-blur-sm sm:p-12">
             <h3 className="mb-6 text-center text-2xl font-bold sm:text-3xl">
               Nasıl Katılırım?
@@ -229,6 +253,7 @@ export default function Home() {
                 </p>
               </div>
             </div>
+          </div>
           </div>
         </div>
       </main>

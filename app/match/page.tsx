@@ -444,7 +444,7 @@ export default function MatchPage() {
         {/* Header */}
         <header className="container relative z-10 mx-auto px-4 py-6 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between">
-            <Link href="/" className="text-2xl sm:text-3xl font-bold hover:opacity-80 transition-opacity">
+            <Link href="/" className="text-2xl sm:text-3xl font-bold hover:opacity-80 transition-opacity" style={{ fontFamily: 'var(--font-modak), "Modak", cursive', fontWeight: 400 }}>
               <span className="select-none">🎄</span> YILDIZLI AĞAÇ
             </Link>
             <Link href="/profile" className="rounded-full border-2 border-[#4a6b5a]/50 px-6 py-2 text-sm font-semibold text-[#d4c494] transition-all hover:border-[#4a6b5a] hover:bg-[#4a6b5a]/10">
@@ -470,7 +470,7 @@ export default function MatchPage() {
 
             {/* Reveal Card */}
             {!revealed ? (
-              <div className="mb-6 rounded-2xl border border-[#4a6b5a]/30 bg-linear-to-br from-[#1a2f25]/50 to-[#0f1f18]/50 p-12 backdrop-blur-sm text-center">
+              <div className="mb-8 rounded-2xl border border-[#4a6b5a]/30 bg-linear-to-br from-[#1a2f25]/50 to-[#0f1f18]/50 p-12 backdrop-blur-sm text-center transition-all duration-300">
                 <div className="mb-6 text-9xl select-none animate-pulse">🎁</div>
                 <h2 className="mb-4 text-3xl font-bold">Sürpriz Zamanı!</h2>
                 <p className="mb-8 text-gray-400">
@@ -478,7 +478,7 @@ export default function MatchPage() {
                 </p>
                 <button
                   onClick={() => setRevealed(true)}
-                  className="inline-flex items-center gap-2 rounded-full bg-linear-to-r from-red-600 to-red-700 px-12 py-4 text-xl font-semibold text-white shadow-lg transition-all hover:scale-105 hover:shadow-xl"
+                  className="inline-flex items-center gap-2 rounded-full bg-linear-to-r from-red-600 to-red-700 px-12 py-4 text-xl font-semibold text-white shadow-lg transition-all duration-200 hover:scale-105 hover:shadow-xl active:scale-95"
                 >
                   <span className="select-none">🎄</span>
                   <span>Açığa Çıkar!</span>
@@ -486,80 +486,52 @@ export default function MatchPage() {
               </div>
             ) : (
               <>
-                 {/* Match Revealed */}
-                 <div className="mb-6 rounded-2xl border border-[#4a6b5a]/30 bg-linear-to-br from-[#1a2f25]/50 to-[#0f1f18]/50 p-8 backdrop-blur-sm">
+                 {/* Match Revealed - Combined Card */}
+                 <div className="mb-8 rounded-2xl border border-[#4a6b5a]/30 bg-linear-to-br from-[#1a2f25]/50 to-[#0f1f18]/50 p-8 backdrop-blur-sm transition-all duration-500 animate-in fade-in slide-in-from-bottom-4">
                    <div className="mb-6 flex items-center gap-6">
-                     <div className="flex h-24 w-24 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-[#4a6b5a] to-[#5a7b6a] text-5xl select-none">
+                     <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-[#4a6b5a] to-[#5a7b6a] text-4xl select-none transition-transform duration-300 hover:scale-110">
                        {matchInfo.matchedWith.gender === "erkek" ? "♂️" : matchInfo.matchedWith.gender === "kadin" ? "♀️" : "⚧️"}
                      </div>
-                     <div>
-                       <h2 className="mb-2 text-3xl font-bold text-[#d4c494]">
+                     <div className="flex-1">
+                       <h2 className="mb-1 text-3xl font-bold text-[#d4c494]">
                          {getInitials(matchInfo.matchedWith.firstName, matchInfo.matchedWith.lastName)}
                        </h2>
                        <p className="text-gray-400 text-sm">Gizlilik için tam isim gösterilmemektedir</p>
+                       <p className="mt-3 text-sm text-gray-300">
+                         Hediyeni <strong className="text-[#d4c494]">{matchInfo.deliveryDate}</strong> tarihinde teslim et. Bu bir <strong className="text-yellow-400">sır</strong> olmalı! 🤫
+                       </p>
                      </div>
                    </div>
 
-                  <div className="rounded-lg bg-[#0a1810]/50 p-6">
-                    <div className="mb-4 flex items-center gap-2">
-                      <span className="text-2xl select-none">🎁</span>
-                      <h3 className="text-xl font-bold">Önemli Bilgi</h3>
+                  {/* Interests - Inline */}
+                  <div className="rounded-lg bg-[#0a1810]/40 p-5 border border-[#4a6b5a]/20">
+                    <div className="mb-3 flex items-center gap-2">
+                      <span className="text-xl select-none">📝</span>
+                      <h3 className="text-lg font-semibold text-[#d4c494]">İlgi Alanları</h3>
                     </div>
-                    <p className="text-gray-300">
-                      Bu kişi senin hediye vereceğin kişi! Unutma, bu bir <strong>sır</strong> olmalı. 
-                      Hediyeni <strong>{matchInfo.deliveryDate}</strong> tarihinde teslim et.
-                    </p>
-                  </div>
-                </div>
-
-                {/* Interests */}
-                <div className="mb-6 rounded-2xl border border-[#4a6b5a]/30 bg-linear-to-br from-[#1a2f25]/50 to-[#0f1f18]/50 p-8 backdrop-blur-sm">
-                  <div className="mb-6 flex items-center gap-2">
-                    <span className="text-2xl select-none">📝</span>
-                    <h3 className="text-2xl font-bold">İlgi Alanları</h3>
-                  </div>
-
-                  <div className="grid gap-3 sm:grid-cols-3">
-                    {matchInfo.matchedWith.interests.map((interest, index) => (
-                      <div key={index} className="rounded-lg bg-[#0a1810]/50 p-4 text-center">
-                        <p className="text-gray-300 font-medium">{interest}</p>
-                      </div>
-                    ))}
+                    <div className="flex flex-wrap gap-2">
+                      {matchInfo.matchedWith.interests.map((interest, index) => (
+                        <span key={index} className="rounded-full bg-[#4a6b5a]/30 px-4 py-1.5 text-sm text-gray-300 border border-[#4a6b5a]/40">
+                          {interest}
+                        </span>
+                      ))}
+                    </div>
                   </div>
                 </div>
 
                 {/* Meeting Time Coordination */}
-                <div className="mb-6 rounded-2xl border border-[#4a6b5a]/30 bg-linear-to-br from-[#1a2f25]/50 to-[#0f1f18]/50 p-8 backdrop-blur-sm">
-                  <div className="mb-6 flex items-center gap-2">
+                <div className="mb-8 rounded-2xl border border-[#4a6b5a]/30 bg-linear-to-br from-[#1a2f25]/50 to-[#0f1f18]/50 p-8 backdrop-blur-sm transition-all duration-300">
+                  <div className="mb-4 flex items-center gap-2">
                     <span className="text-2xl select-none">📅</span>
-                    <h3 className="text-2xl font-bold">Buluşma Zamanı Koordinasyonu</h3>
+                    <h3 className="text-2xl font-bold">Buluşma Zamanınızı Belirleyin!</h3>
                   </div>
 
-                  <p className="mb-6 text-gray-400">
-                    Hediyeyi teslim etmek için uygun olduğunuz <strong>3 farklı gün</strong> ve <strong>tam saat</strong> seçin. 
+                  <p className="mb-6 text-gray-300 leading-relaxed">
+                    Uygun olduğunuz <strong className="text-[#d4c494]">3 farklı gün</strong> ve <strong className="text-[#d4c494]">saat</strong> seçin. 
                     Eşleştiğiniz kişinin önerileriyle karşılaştırıp ortak zaman bulabilirsiniz.
                   </p>
 
-                  {/* Priority Information */}
-                  <div className="mb-6 rounded-lg border-2 border-[#d4c494]/30 bg-[#d4c494]/5 p-4">
-                    <div className="flex items-start gap-3">
-                      <svg className="h-5 w-5 flex-shrink-0 text-[#d4c494] mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                      <div className="flex-1">
-                        <p className="text-sm font-medium text-[#d4c494] mb-1">
-                          Öncelik Sıralaması Önemli
-                        </p>
-                        <p className="text-xs text-gray-300">
-                          Seçtiğiniz zamanları <strong>en uygun</strong> olandan <strong>en az uygun</strong> olana doğru sıralayın. 
-                          İlk sıradaki zaman en çok tercih ettiğiniz, son sıradaki ise en az tercih ettiğiniz zamandır. 
-                          Sıralamayı değiştirmek için yukarı/aşağı ok butonlarını kullanın.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Warning Message */}
+                  {/* Consolidated Info & Warning */}
                   {(() => {
                     const filledSlots = myProposedTimes.filter(slot => slot.date && slot.hour);
                     const dates = myProposedTimes.map(slot => slot.date).filter(Boolean);
@@ -568,69 +540,81 @@ export default function MatchPage() {
                     const allDatesDifferent = dates.length === 3 && uniqueDates.size === 3;
                     const isComplete = allSlotsFilled && allDatesDifferent;
                     
-                    if (!isComplete) {
-                      return (
-                        <div className="mb-6 rounded-lg border-2 border-yellow-600/50 bg-yellow-600/10 p-4">
-                          <div className="flex items-start gap-3">
-                            <svg className="h-5 w-5 flex-shrink-0 text-yellow-400 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                            </svg>
-                            <div className="flex-1">
-                              <p className="text-sm font-medium text-yellow-400 mb-1">
-                                3 farklı gün ve saat seçmelisin
-                              </p>
-                              <p className="text-xs text-yellow-300/80">
-                                {myProposedTimes.length < 3 
-                                  ? `${3 - myProposedTimes.length} zaman slotu daha ekleyin.`
-                                  : filledSlots.length < 3
-                                  ? `${3 - filledSlots.length} zaman slotu için tarih ve saat seçin.`
-                                  : !allDatesDifferent
-                                  ? "Her zaman slotu için farklı bir gün seçin. Saatler aynı olabilir."
-                                  : ""
-                                }
-                              </p>
-                            </div>
+                    return (
+                      <div className={`mb-6 rounded-lg border p-4 transition-all duration-200 ${
+                        isComplete 
+                          ? "border-[#4a6b5a]/40 bg-[#4a6b5a]/5"
+                          : "border-yellow-600/50 bg-yellow-600/10"
+                      }`}>
+                        <div className="flex items-start gap-3">
+                          <svg className={`h-5 w-5 flex-shrink-0 mt-0.5 ${isComplete ? "text-[#4a6b5a]" : "text-yellow-400"}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={isComplete ? "M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" : "M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"} />
+                          </svg>
+                          <div className="flex-1">
+                            {isComplete ? (
+                              <>
+                                <p className="text-sm font-medium text-[#d4c494] mb-1">Tüm zamanlar seçildi!</p>
+                                <p className="text-xs text-gray-300">
+                                  Zamanları <strong>öncelik sırasına</strong> göre sıralayın (yukarı/aşağı oklar). İlk sıra en uygun zamanınızdır.
+                                </p>
+                              </>
+                            ) : (
+                              <>
+                                <p className="text-sm font-medium text-yellow-400 mb-1">
+                                  3 farklı gün ve saat seçmelisin
+                                </p>
+                                <p className="text-xs text-yellow-300/80">
+                                  {myProposedTimes.length < 3 
+                                    ? `${3 - myProposedTimes.length} zaman slotu daha ekleyin.`
+                                    : filledSlots.length < 3
+                                    ? `${3 - filledSlots.length} zaman slotu için tarih ve saat seçin.`
+                                    : !allDatesDifferent
+                                    ? "Her zaman slotu için farklı bir gün seçin."
+                                    : ""
+                                  }
+                                </p>
+                              </>
+                            )}
                           </div>
                         </div>
-                      );
-                    }
-                    return null;
+                      </div>
+                    );
                   })()}
 
                   {/* My Proposed Times Form */}
-                  <div className="mb-6 rounded-lg bg-[#0a1810]/50 p-6">
-                    <h4 className="mb-4 font-semibold text-[#d4c494]">Senin Önerdiğin Zamanlar</h4>
+                  <div className="mb-6 rounded-lg bg-[#0a1810]/40 p-6 border border-[#4a6b5a]/20">
+                    <h4 className="mb-4 text-lg font-semibold text-[#d4c494]">Senin Önerdiğin Zamanlar</h4>
                     
                     {/* Time Slots */}
-                    <div className="space-y-4 mb-4">
+                    <div className="space-y-3 mb-4">
                       {myProposedTimes.map((slot, index) => (
-                        <div key={index} className="rounded-lg border-2 border-[#4a6b5a]/30 bg-[#0f1f18]/50 p-4">
+                        <div key={index} className="rounded-lg border border-[#4a6b5a]/30 bg-[#0f1f18]/40 p-4 transition-all duration-200 hover:border-[#4a6b5a]/50 hover:bg-[#0f1f18]/60">
                           <div className="mb-3 flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                              <span className="text-sm font-medium text-[#d4c494]">
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs font-medium text-gray-400 bg-[#4a6b5a]/20 px-2 py-1 rounded">
                                 {index + 1}. Öncelik
                               </span>
                               {index === 0 && (
-                                <span className="text-xs text-green-400 bg-green-400/10 px-2 py-0.5 rounded">
+                                <span className="text-xs text-green-400 bg-green-400/10 px-2 py-1 rounded border border-green-400/20">
                                   En uygun
                                 </span>
                               )}
                               {index === myProposedTimes.length - 1 && index > 0 && (
-                                <span className="text-xs text-orange-400 bg-orange-400/10 px-2 py-0.5 rounded">
+                                <span className="text-xs text-orange-400 bg-orange-400/10 px-2 py-1 rounded border border-orange-400/20">
                                   En az uygun
                                 </span>
                               )}
                             </div>
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-1">
                               {/* Move Up Button */}
                               <button
                                 type="button"
                                 onClick={() => handleMoveSlotUp(index)}
                                 disabled={index === 0}
-                                className={`p-1.5 rounded transition-colors ${
+                                className={`p-1.5 rounded transition-all duration-150 ${
                                   index === 0
-                                    ? "text-gray-600 cursor-not-allowed opacity-40"
-                                    : "text-[#d4c494] hover:bg-[#4a6b5a]/30 hover:text-white"
+                                    ? "text-gray-600 cursor-not-allowed opacity-30"
+                                    : "text-[#d4c494] hover:bg-[#4a6b5a]/30 hover:text-white hover:scale-110 active:scale-95"
                                 }`}
                                 aria-label="Yukarı taşı"
                                 title="Yukarı taşı"
@@ -644,10 +628,10 @@ export default function MatchPage() {
                                 type="button"
                                 onClick={() => handleMoveSlotDown(index)}
                                 disabled={index === myProposedTimes.length - 1}
-                                className={`p-1.5 rounded transition-colors ${
+                                className={`p-1.5 rounded transition-all duration-150 ${
                                   index === myProposedTimes.length - 1
-                                    ? "text-gray-600 cursor-not-allowed opacity-40"
-                                    : "text-[#d4c494] hover:bg-[#4a6b5a]/30 hover:text-white"
+                                    ? "text-gray-600 cursor-not-allowed opacity-30"
+                                    : "text-[#d4c494] hover:bg-[#4a6b5a]/30 hover:text-white hover:scale-110 active:scale-95"
                                 }`}
                                 aria-label="Aşağı taşı"
                                 title="Aşağı taşı"
@@ -661,7 +645,7 @@ export default function MatchPage() {
                                 <button
                                   type="button"
                                   onClick={() => handleRemoveTimeSlot(index)}
-                                  className="p-1.5 text-red-400 hover:text-red-300 hover:bg-red-400/10 rounded transition-colors"
+                                  className="p-1.5 text-red-400 hover:text-red-300 hover:bg-red-400/10 rounded transition-all duration-150 hover:scale-110 active:scale-95"
                                   aria-label="Zamanı kaldır"
                                   title="Zamanı kaldır"
                                 >
@@ -674,17 +658,17 @@ export default function MatchPage() {
                           </div>
                           <div className="grid gap-3 sm:grid-cols-2">
                             <div className="relative">
-                              <label className="mb-1 block text-xs text-gray-400">Tarih</label>
+                              <label className="mb-1.5 block text-xs font-medium text-gray-400">Tarih</label>
                               <button
                                 ref={(el) => { buttonRefs.current[index] = el; }}
                                 type="button"
                                 onClick={() => toggleCalendar(index)}
-                                className="w-full rounded-lg border border-[#4a6b5a]/50 bg-[#0a1810]/70 px-3 py-2 text-sm text-white transition-colors hover:border-[#4a6b5a] hover:bg-[#0a1810]/90 focus:border-[#4a6b5a] focus:outline-none focus:ring-2 focus:ring-[#4a6b5a]/20 flex items-center justify-between"
+                                className="w-full rounded-lg border border-[#4a6b5a]/50 bg-[#0a1810]/70 px-3 py-2.5 text-sm text-white transition-all duration-200 hover:border-[#4a6b5a] hover:bg-[#0a1810]/90 focus:border-[#4a6b5a] focus:outline-none focus:ring-2 focus:ring-[#4a6b5a]/20 flex items-center justify-between"
                               >
-                                <span className={slot.date ? "text-white" : "text-gray-500"}>
+                                <span className={slot.date ? "text-white font-medium" : "text-gray-500"}>
                                   {slot.date ? formatDate(slot.date) : "Tarih seçin"}
                                 </span>
-                                <svg className="h-4 w-4 text-[#d4c494]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg className="h-4 w-4 text-[#d4c494] transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                 </svg>
                               </button>
@@ -693,7 +677,7 @@ export default function MatchPage() {
                               {openCalendars[index] && (
                                 <div 
                                   ref={(el) => { calendarRefs.current[index] = el; }}
-                                  className="absolute z-50 mt-2 w-full rounded-xl border border-[#4a6b5a]/50 bg-[#0a1810] p-4 shadow-2xl"
+                                  className="absolute z-50 mt-2 w-full rounded-xl border border-[#4a6b5a]/50 bg-[#0a1810] p-4 shadow-2xl animate-in fade-in slide-in-from-top-2 duration-200"
                                 >
                                   {(() => {
                                     // Always show December 2025
@@ -857,12 +841,12 @@ export default function MatchPage() {
                               )}
                             </div>
                             <div className="relative">
-                              <label className="mb-1 block text-xs text-gray-400">Saat</label>
+                              <label className="mb-1.5 block text-xs font-medium text-gray-400">Saat</label>
                               <button
                                 ref={(el) => { timePickerButtonRefs.current[index] = el; }}
                                 type="button"
                                 onClick={() => toggleTimePicker(index)}
-                                className="w-full rounded-lg border border-[#4a6b5a]/50 bg-[#0a1810]/70 px-3 py-2.5 text-sm text-white transition-all hover:border-[#4a6b5a] hover:bg-[#0a1810]/90 focus:border-[#4a6b5a] focus:outline-none focus:ring-2 focus:ring-[#4a6b5a]/20 flex items-center justify-between"
+                                className="w-full rounded-lg border border-[#4a6b5a]/50 bg-[#0a1810]/70 px-3 py-2.5 text-sm text-white transition-all duration-200 hover:border-[#4a6b5a] hover:bg-[#0a1810]/90 focus:border-[#4a6b5a] focus:outline-none focus:ring-2 focus:ring-[#4a6b5a]/20 flex items-center justify-between"
                               >
                                 <span className={slot.hour ? "text-white font-medium" : "text-gray-500"}>
                                   {slot.hour || "Saat seçin"}
@@ -881,7 +865,7 @@ export default function MatchPage() {
                               {openTimePickers[index] && (
                                 <div
                                   ref={(el) => { timePickerRefs.current[index] = el; }}
-                                  className="absolute z-50 mt-2 w-full rounded-xl border border-[#4a6b5a]/50 bg-[#0a1810] shadow-2xl overflow-hidden"
+                                  className="absolute z-50 mt-2 w-full rounded-xl border border-[#4a6b5a]/50 bg-[#0a1810] shadow-2xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200"
                                 >
                                   <div className="relative h-60 overflow-hidden">
                                     {/* Selection indicator - center highlight */}
@@ -925,7 +909,7 @@ export default function MatchPage() {
                             </div>
                           </div>
                           {slot.date && slot.hour && (
-                            <div className="mt-3 rounded-lg border border-[#4a6b5a]/40 bg-gradient-to-r from-[#4a6b5a]/30 to-[#5a7b6a]/20 p-3">
+                            <div className="mt-3 rounded-lg border border-[#4a6b5a]/40 bg-gradient-to-r from-[#4a6b5a]/20 to-[#5a7b6a]/10 p-3 transition-all duration-200 animate-in fade-in">
                               <div className="flex items-center gap-2">
                                 <svg className="h-4 w-4 text-[#d4c494] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -946,10 +930,10 @@ export default function MatchPage() {
                       <button
                         type="button"
                         onClick={handleAddTimeSlot}
-                        className="w-full rounded-lg border-2 border-dashed border-[#4a6b5a]/50 px-4 py-3 text-sm font-semibold text-[#d4c494] transition-all hover:border-[#4a6b5a] hover:bg-[#4a6b5a]/10"
+                        className="w-full rounded-lg border-2 border-dashed border-[#4a6b5a]/50 px-4 py-3 text-sm font-semibold text-[#d4c494] transition-all duration-200 hover:border-[#4a6b5a] hover:bg-[#4a6b5a]/10 hover:scale-[1.02] active:scale-[0.98]"
                       >
                         <span className="flex items-center justify-center gap-2">
-                          <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg className="h-5 w-5 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                           </svg>
                           Zaman Ekle ({myProposedTimes.length}/3)
@@ -971,7 +955,7 @@ export default function MatchPage() {
                           type="button"
                           onClick={validateAndSubmit}
                           disabled={isSubmitting}
-                          className="mt-4 w-full rounded-full bg-linear-to-r from-[#4a6b5a] to-[#5a7b6a] px-6 py-3 text-sm font-semibold text-white shadow-lg transition-all hover:scale-105 hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                          className="mt-4 w-full rounded-full bg-linear-to-r from-[#4a6b5a] to-[#5a7b6a] px-6 py-3 text-sm font-semibold text-white shadow-lg transition-all duration-200 hover:scale-105 hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 active:scale-95"
                         >
                           {isSubmitting ? (
                             <span className="flex items-center justify-center gap-2">
@@ -989,43 +973,25 @@ export default function MatchPage() {
                     )}
                   </div>
 
-                  {/* Overlapping Times Alert */}
-                  {overlappingTimes.length > 0 && (
-                    <div className="mb-6 rounded-xl border-2 border-green-600/50 bg-gradient-to-br from-green-600/20 to-green-600/10 p-5 shadow-lg shadow-green-600/10">
-                      <div className="flex items-center gap-3 mb-4">
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-green-600/30">
-                          <svg className="h-6 w-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  {/* Their Proposed Times - Combined with Overlapping Alert */}
+                  <div className="rounded-lg bg-[#0a1810]/40 p-6 border border-[#4a6b5a]/20">
+                    <h4 className="mb-4 text-lg font-semibold text-[#d4c494]">
+                      {matchInfo.matchedWith.firstName.charAt(0)}. Önerdiği Zamanlar
+                    </h4>
+                    
+                    {/* Overlapping Times Alert - Inline */}
+                    {overlappingTimes.length > 0 && (
+                      <div className="mb-4 rounded-lg border border-green-600/50 bg-green-600/10 p-3">
+                        <div className="flex items-center gap-2 mb-2">
+                          <svg className="h-4 w-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                           </svg>
-                        </div>
-                        <div>
-                          <h4 className="text-lg font-bold text-green-400">Ortak Zamanlar Bulundu! 🎯</h4>
-                          <p className="text-xs text-green-300/80">Bu zamanlarda buluşabilirsiniz</p>
+                          <span className="text-sm font-semibold text-green-400">Ortak Zamanlar Bulundu! 🎯</span>
                         </div>
                       </div>
-                      <div className="space-y-2">
-                        {overlappingTimes.map((time, index) => {
-                          const formattedTime = formatTimeString(time);
-                          return (
-                            <div key={index} className="flex items-center gap-3 rounded-lg bg-green-600/20 border border-green-600/40 p-3">
-                              <svg className="h-5 w-5 text-green-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                              </svg>
-                              <span className="font-semibold text-green-300">{formattedTime}</span>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Their Proposed Times */}
-                  <div className="rounded-lg bg-[#0a1810]/50 p-6">
-                    <h4 className="mb-4 font-semibold text-[#d4c494]">
-                      {matchInfo.matchedWith.firstName.charAt(0)}. Önerdiği Zamanlar:
-                    </h4>
+                    )}
                     {matchInfo.matchedWith.proposedTimes.length > 0 ? (
-                      <div className="space-y-3">
+                      <div className="space-y-2">
                         {matchInfo.matchedWith.proposedTimes.map((time, index) => {
                           const formattedTime = formatTimeString(time);
                           const normalizedFormatted = formattedTime.toLowerCase().replace(/\s+/g, ' ');
@@ -1036,34 +1002,34 @@ export default function MatchPage() {
                           return (
                             <div
                               key={index}
-                              className={`rounded-lg border p-4 transition-all ${
+                              className={`rounded-lg border p-3 transition-all duration-200 ${
                                 isOverlapping
-                                  ? "border-green-600/50 bg-gradient-to-r from-green-600/20 to-green-600/10 shadow-lg shadow-green-600/10"
-                                  : "border-[#4a6b5a]/40 bg-gradient-to-r from-[#4a6b5a]/20 to-[#5a7b6a]/10"
+                                  ? "border-green-600/50 bg-green-600/10"
+                                  : "border-[#4a6b5a]/30 bg-[#0a1810]/30"
                               }`}
                             >
                               <div className="flex items-center gap-3">
-                                <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${
+                                <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-all duration-200 ${
                                   isOverlapping
                                     ? "bg-green-600/30 text-green-400"
                                     : "bg-[#4a6b5a]/30 text-[#d4c494]"
                                 }`}>
                                   {isOverlapping ? (
-                                    <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                     </svg>
                                   ) : (
-                                    <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                     </svg>
                                   )}
                                 </div>
                                 <div className="flex-1">
                                   {isOverlapping && (
-                                    <p className="text-xs font-medium text-green-400 mb-1">Ortak Zaman 🎯</p>
+                                    <p className="text-xs font-medium text-green-400 mb-0.5">Ortak Zaman 🎯</p>
                                   )}
-                                  <p className={`text-sm font-semibold ${
-                                    isOverlapping ? "text-green-300" : "text-[#d4c494]"
+                                  <p className={`text-sm font-medium ${
+                                    isOverlapping ? "text-green-300" : "text-gray-300"
                                   }`}>
                                     {formattedTime}
                                   </p>
@@ -1083,17 +1049,14 @@ export default function MatchPage() {
                   </div>
                 </div>
 
-                {/* Reminder Card */}
-                <div className="mb-6 rounded-2xl border border-yellow-600/30 bg-linear-to-br from-yellow-900/20 to-yellow-800/10 p-6 backdrop-blur-sm">
-                  <div className="flex items-start gap-4">
-                    <span className="text-4xl select-none">⚠️</span>
-                    <div>
-                      <h3 className="mb-2 text-xl font-bold text-yellow-400">Hatırlatma</h3>
-                      <ul className="space-y-1 text-sm text-gray-300">
-                        <li>• Hediye bütçesi: 100-300 TL arası önerilir</li>
-                        <li>• Teslim tarihiniz: <strong>{matchInfo.deliveryDate}</strong></li>
-                        <li>• Eşleşmeni gizli tut - bu bir sürpriz! 🤫</li>
-                        <li>• Kişinin tercihlerini dikkate alarak düşünceli bir hediye seç</li>
+                {/* Compact Reminder */}
+                <div className="mb-6 rounded-lg border border-yellow-600/30 bg-yellow-600/10 p-4">
+                  <div className="flex items-start gap-3">
+                    <span className="text-2xl select-none">⚠️</span>
+                    <div className="flex-1">
+                      <h3 className="mb-2 text-sm font-semibold text-yellow-400">Hatırlatma</h3>
+                      <ul className="space-y-1 text-xs text-gray-300">
+                        <li>• Bütçe: 100-300 TL • Teslim: <strong>{matchInfo.deliveryDate}</strong> • Gizli tut! 🤫</li>
                       </ul>
                     </div>
                   </div>
@@ -1103,7 +1066,7 @@ export default function MatchPage() {
                 <div className="flex flex-col gap-3 sm:flex-row">
                   <Link
                     href="/profile"
-                    className="flex-1 rounded-full border-2 border-[#d4c494]/50 px-8 py-4 text-center text-lg font-semibold text-[#d4c494] transition-all hover:border-[#d4c494] hover:bg-[#d4c494]/10"
+                    className="flex-1 rounded-full border-2 border-[#d4c494]/50 px-8 py-4 text-center text-lg font-semibold text-[#d4c494] transition-all duration-200 hover:border-[#d4c494] hover:bg-[#d4c494]/10 hover:scale-105 active:scale-95"
                   >
                     Profilime Dön
                   </Link>

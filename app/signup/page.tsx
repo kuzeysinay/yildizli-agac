@@ -177,9 +177,8 @@ export default function SignupPage() {
       const result = await response.json();
 
       if (response.ok && result.success) {
-        // Registration successful - redirect to login
-        alert("Kayıt başarılı! Giriş sayfasına yönlendiriliyorsunuz...");
-        window.location.href = "/login";
+        // Registration successful - redirect to verification page
+        window.location.href = "/verify";
       } else {
         // Registration failed
         setError(result.message || "Kayıt işlemi başarısız oldu. Lütfen tekrar deneyin.");
@@ -219,7 +218,7 @@ export default function SignupPage() {
         {/* Header */}
         <header className="container relative z-10 mx-auto px-4 py-6 sm:px-6 lg:px-8">
           <div className="flex items-center justify-center">
-            <Link href="/" className="text-2xl sm:text-3xl font-bold hover:opacity-80 transition-opacity">
+            <Link href="/" className="text-2xl sm:text-3xl font-bold hover:opacity-80 transition-opacity" style={{ fontFamily: 'var(--font-modak), "Modak", cursive', fontWeight: 400 }}>
               <span className="select-none">🎄</span> YILDIZLI AĞAÇ
             </Link>
           </div>
