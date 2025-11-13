@@ -10,6 +10,8 @@ type TimeSlot = {
 
 export default function MatchPage() {
   const [revealed, setRevealed] = useState(false);
+  const [isOpening, setIsOpening] = useState(false);
+  const [isZooming, setIsZooming] = useState(false);
   const [myProposedTimes, setMyProposedTimes] = useState<TimeSlot[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
@@ -418,9 +420,9 @@ export default function MatchPage() {
   };
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-linear-to-b from-[#0a1810] via-[#0d1f18] to-[#0a1810] text-white font-(family-name:--font-work-sans)">
+    <div className={`relative min-h-screen overflow-hidden bg-linear-to-b from-[#0a1810] via-[#0d1f18] to-[#0a1810] text-white font-(family-name:--font-work-sans) ${isZooming ? 'page-transitioning' : ''} ${revealed ? 'page-revealed' : ''}`}>
       {/* Background Layer - Snowflakes */}
-      <div className="fixed inset-0 z-0 pointer-events-none">
+      <div className={`fixed inset-0 z-0 pointer-events-none background-elements ${isZooming ? 'fade-out-background' : ''} ${revealed ? 'fade-in-background' : ''}`}>
         {/* Animated Snowflakes */}
         <div className="snowflake" style={{left: '10%', animationDuration: '10s', animationDelay: '0s'}}>❄</div>
         <div className="snowflake" style={{left: '20%', animationDuration: '12s', animationDelay: '2s', fontSize: '1.5em'}}>❄</div>
@@ -442,7 +444,7 @@ export default function MatchPage() {
       {/* Content Layer */}
       <div className="relative z-10">
         {/* Header */}
-        <header className="container relative z-10 mx-auto px-4 py-6 sm:px-6 lg:px-8">
+        <header className={`container relative z-10 mx-auto px-4 py-6 sm:px-6 lg:px-8 page-header ${isZooming ? 'fade-out-header' : ''} ${revealed ? 'fade-in-header' : ''}`}>
           <div className="flex items-center justify-between">
             <Link href="/" className="text-2xl sm:text-3xl font-bold hover:opacity-80 transition-opacity" style={{ fontFamily: 'var(--font-modak), "Modak", cursive', fontWeight: 400 }}>
               <span className="select-none">🎄</span> YILDIZLI AĞAÇ
@@ -454,10 +456,10 @@ export default function MatchPage() {
         </header>
 
         {/* Main Content */}
-        <main className="container relative z-10 mx-auto px-4 py-8 sm:px-6 lg:px-8">
+        <main className={`container relative z-10 mx-auto px-4 py-8 sm:px-6 lg:px-8 page-zoom-wrapper ${isZooming ? 'zooming' : ''} ${revealed ? 'revealed' : ''}`}>
           <div className="mx-auto max-w-3xl">
             {/* Page Title */}
-            <div className="mb-8 text-center">
+            <div className={`mb-8 text-center page-title ${isZooming ? 'fade-out' : ''} ${revealed ? 'hidden' : ''}`}>
               <h1 className="mb-4 text-5xl font-bold">
                 <span className="bg-linear-to-r from-[#9db89d] to-[#c4d4a6] bg-clip-text text-transparent">
                   EŞLEŞMEN
@@ -470,24 +472,313 @@ export default function MatchPage() {
 
             {/* Reveal Card */}
             {!revealed ? (
-              <div className="mb-8 rounded-2xl border border-[#4a6b5a]/30 bg-linear-to-br from-[#1a2f25]/50 to-[#0f1f18]/50 p-12 backdrop-blur-sm text-center transition-all duration-300">
-                <div className="mb-6 text-9xl select-none animate-pulse">🎁</div>
-                <h2 className="mb-4 text-3xl font-bold">Sürpriz Zamanı!</h2>
-                <p className="mb-8 text-gray-400">
-                  Hediye alacağın kişiyi öğrenmeye hazır mısın?
-                </p>
-                <button
-                  onClick={() => setRevealed(true)}
-                  className="inline-flex items-center gap-2 rounded-full bg-linear-to-r from-red-600 to-red-700 px-12 py-4 text-xl font-semibold text-white shadow-lg transition-all duration-200 hover:scale-105 hover:shadow-xl active:scale-95"
-                >
-                  <span className="select-none">🎄</span>
-                  <span>Açığa Çıkar!</span>
-                </button>
+              <div 
+                onClick={() => {
+                  if (!isOpening && !isZooming) {
+                    setIsZooming(true);
+                    setTimeout(() => {
+                      setIsOpening(true);
+                    }, 600);
+                    setTimeout(() => {
+                      setRevealed(true);
+                      setIsZooming(false);
+                    }, 1400);
+                  }
+                }}
+                className={`mb-8 gift-box-container cursor-pointer transition-all duration-300 ${isOpening ? 'opening' : 'hover:scale-105'} ${isOpening ? 'box-clicked' : ''} ${isZooming ? 'box-zoom-target' : ''} active:scale-95`}
+              >
+                <div className={`gift-box ${isOpening ? 'box-opening' : ''}`}>
+                  {/* Gift Box Body */}
+                  <div className="gift-box-body">
+                    {/* Inner glow when opening */}
+                    {isOpening && <div className="box-inner-glow"></div>}
+                  </div>
+                  {/* Gift Box Top (Lid) */}
+                  <div className={`gift-box-top ${isOpening ? 'lid-opening' : ''}`}>
+                    {/* Lid inner shadow for depth */}
+                    <div className="lid-inner-shadow"></div>
+                    {/* Shimmer effect on lid */}
+                    {!isOpening && <div className="lid-shimmer"></div>}
+                  </div>
+                  {/* Horizontal Ribbon */}
+                  <div className={`ribbon-horizontal ${isOpening ? 'ribbon-untie-h' : ''}`}>
+                    {isOpening && <div className="ribbon-pieces"></div>}
+                  </div>
+                  {/* Vertical Ribbon */}
+                  <div className={`ribbon-vertical ${isOpening ? 'ribbon-untie-v' : ''}`}></div>
+                  {/* Bow - Realistic 3D Satin Bow with Tails */}
+                  <div className={`gift-bow ${isOpening ? 'bow-untie' : ''}`}>
+                    <svg
+                      className="bowtie-svg"
+                      viewBox="0 0 200 200"
+                      width="200"
+                      height="200"
+                      xmlns="http://www.w3.org/2000/svg"
+                      style={{ overflow: 'visible' }}
+                    >
+                      <defs>
+                        {/* Satin-like gradients with glossy highlights */}
+                        <linearGradient id="bow-red-satin" x1="0%" y1="0%" x2="100%" y2="100%">
+                          <stop offset="0%" stopColor="#ff4444" />
+                          <stop offset="30%" stopColor="#dc2626" />
+                          <stop offset="60%" stopColor="#b91c1c" />
+                          <stop offset="100%" stopColor="#991b1b" />
+                        </linearGradient>
+                        
+                        {/* Highlight gradient (light from top-left) */}
+                        <linearGradient id="bow-highlight" x1="0%" y1="0%" x2="100%" y2="100%">
+                          <stop offset="0%" stopColor="#ffffff" stopOpacity="0.6" />
+                          <stop offset="40%" stopColor="#ffffff" stopOpacity="0.3" />
+                          <stop offset="100%" stopColor="transparent" stopOpacity="0" />
+                        </linearGradient>
+                        
+                        {/* Shadow gradient */}
+                        <linearGradient id="bow-shadow" x1="0%" y1="0%" x2="100%" y2="100%">
+                          <stop offset="0%" stopColor="transparent" stopOpacity="0" />
+                          <stop offset="100%" stopColor="#000000" stopOpacity="0.4" />
+                        </linearGradient>
+                        
+                        {/* Knot gradient */}
+                        <radialGradient id="knot-gradient" cx="40%" cy="30%" r="80%">
+                          <stop offset="0%" stopColor="#dc2626" />
+                          <stop offset="50%" stopColor="#b91c1c" />
+                          <stop offset="100%" stopColor="#991b1b" />
+                        </radialGradient>
+                        
+                        {/* Tail gradient */}
+                        <linearGradient id="tail-gradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                          <stop offset="0%" stopColor="#dc2626" />
+                          <stop offset="100%" stopColor="#991b1b" />
+                        </linearGradient>
+                      </defs>
+
+                      {/* Left Bow Loop - Full and rounded with folds */}
+                      <g className={`bow-loop-left ${isOpening ? 'bow-loop-left-fall' : ''}`}>
+                        {/* Main loop shape */}
+                        <path
+                          d="M 40 100 
+                             Q 20 65, 30 45 
+                             Q 45 25, 70 30 
+                             Q 85 35, 92 50 
+                             Q 95 65, 90 80 
+                             Q 82 95, 65 98 
+                             Q 50 100, 40 100 Z"
+                          fill="url(#bow-red-satin)"
+                          stroke="#7f1d1d"
+                          strokeWidth="1.5"
+                        />
+                        {/* Inner fold/shadow */}
+                        <path
+                          d="M 50 55 
+                             Q 65 50, 80 58 
+                             Q 78 70, 72 82 
+                             Q 65 88, 55 85 
+                             Q 48 75, 50 55 Z"
+                          fill="url(#bow-shadow)"
+                          opacity="0.6"
+                        />
+                        {/* Highlight on top-left */}
+                        <path
+                          d="M 45 40 
+                             Q 60 35, 75 42 
+                             Q 73 55, 68 68 
+                             Q 62 75, 52 72 
+                             Q 46 60, 45 40 Z"
+                          fill="url(#bow-highlight)"
+                          opacity="0.7"
+                        />
+                        {/* Crease line */}
+                        <path
+                          d="M 55 50 Q 70 48, 82 55"
+                          fill="none"
+                          stroke="rgba(127, 29, 29, 0.5)"
+                          strokeWidth="1"
+                          strokeLinecap="round"
+                        />
+                      </g>
+
+                      {/* Right Bow Loop - Full and rounded with folds */}
+                      <g className={`bow-loop-right ${isOpening ? 'bow-loop-right-fall' : ''}`}>
+                        {/* Main loop shape */}
+                        <path
+                          d="M 160 100 
+                             Q 180 65, 170 45 
+                             Q 155 25, 130 30 
+                             Q 115 35, 108 50 
+                             Q 105 65, 110 80 
+                             Q 118 95, 135 98 
+                             Q 150 100, 160 100 Z"
+                          fill="url(#bow-red-satin)"
+                          stroke="#7f1d1d"
+                          strokeWidth="1.5"
+                        />
+                        {/* Inner fold/shadow */}
+                        <path
+                          d="M 150 55 
+                             Q 135 50, 120 58 
+                             Q 122 70, 128 82 
+                             Q 135 88, 145 85 
+                             Q 152 75, 150 55 Z"
+                          fill="url(#bow-shadow)"
+                          opacity="0.6"
+                        />
+                        {/* Highlight on top-left */}
+                        <path
+                          d="M 155 40 
+                             Q 140 35, 125 42 
+                             Q 127 55, 132 68 
+                             Q 138 75, 148 72 
+                             Q 154 60, 155 40 Z"
+                          fill="url(#bow-highlight)"
+                          opacity="0.7"
+                        />
+                        {/* Crease line */}
+                        <path
+                          d="M 145 50 Q 130 48, 118 55"
+                          fill="none"
+                          stroke="rgba(127, 29, 29, 0.5)"
+                          strokeWidth="1"
+                          strokeLinecap="round"
+                        />
+                      </g>
+
+                      {/* Center Knot - Tightly cinched */}
+                      <g className={`bow-knot-group ${isOpening ? 'knot-explode' : ''}`}>
+                        {/* Knot shadow */}
+                        <ellipse
+                          cx="100"
+                          cy="105"
+                          rx="16"
+                          ry="12"
+                          fill="rgba(0, 0, 0, 0.3)"
+                          opacity="0.5"
+                        />
+                        {/* Knot main body */}
+                        <ellipse
+                          cx="100"
+                          cy="100"
+                          rx="16"
+                          ry="24"
+                          fill="url(#knot-gradient)"
+                          stroke="#7f1d1d"
+                          strokeWidth="2"
+                        />
+                        {/* Knot highlight */}
+                        <ellipse
+                          cx="96"
+                          cy="92"
+                          rx="10"
+                          ry="14"
+                          fill="url(#bow-highlight)"
+                          opacity="0.5"
+                        />
+                        {/* Knot center detail */}
+                        <ellipse
+                          cx="100"
+                          cy="100"
+                          rx="8"
+                          ry="12"
+                          fill="#991b1b"
+                        />
+                      </g>
+
+                      {/* Left Tail - Extending downward with curl */}
+                      <g className={`bow-tail-left ${isOpening ? 'tail-fall-left' : ''}`}>
+                        <path
+                          d="M 85 100 
+                             Q 75 110, 70 125 
+                             Q 68 140, 72 150 
+                             Q 75 155, 80 152 
+                             Q 78 145, 80 135 
+                             Q 82 120, 88 110 
+                             Q 90 105, 85 100 Z"
+                          fill="url(#tail-gradient)"
+                          stroke="#7f1d1d"
+                          strokeWidth="1.5"
+                        />
+                        {/* Tail highlight */}
+                        <path
+                          d="M 84 105 
+                             Q 76 115, 72 130 
+                             Q 70 142, 73 148"
+                          fill="none"
+                          stroke="url(#bow-highlight)"
+                          strokeWidth="2"
+                          opacity="0.4"
+                          strokeLinecap="round"
+                        />
+                        {/* Curled end */}
+                        <ellipse
+                          cx="75"
+                          cy="150"
+                          rx="6"
+                          ry="8"
+                          fill="#dc2626"
+                          stroke="#991b1b"
+                          strokeWidth="1"
+                        />
+                      </g>
+
+                      {/* Right Tail - Extending downward with curl */}
+                      <g className={`bow-tail-right ${isOpening ? 'tail-fall-right' : ''}`}>
+                        <path
+                          d="M 115 100 
+                             Q 125 110, 130 125 
+                             Q 132 140, 128 150 
+                             Q 125 155, 120 152 
+                             Q 122 145, 120 135 
+                             Q 118 120, 112 110 
+                             Q 110 105, 115 100 Z"
+                          fill="url(#tail-gradient)"
+                          stroke="#7f1d1d"
+                          strokeWidth="1.5"
+                        />
+                        {/* Tail highlight */}
+                        <path
+                          d="M 116 105 
+                             Q 124 115, 128 130 
+                             Q 130 142, 127 148"
+                          fill="none"
+                          stroke="url(#bow-highlight)"
+                          strokeWidth="2"
+                          opacity="0.4"
+                          strokeLinecap="round"
+                        />
+                        {/* Curled end */}
+                        <ellipse
+                          cx="125"
+                          cy="150"
+                          rx="6"
+                          ry="8"
+                          fill="#dc2626"
+                          stroke="#991b1b"
+                          strokeWidth="1"
+                        />
+                      </g>
+                    </svg>
+                  </div>
+                  {/* Sparkle particles */}
+                  {isOpening && (
+                    <>
+                      {[...Array(12)].map((_, i) => (
+                        <div key={i} className={`sparkle-particle sparkle-${i}`}></div>
+                      ))}
+                    </>
+                  )}
+                  {/* Glow rings */}
+                  {isOpening && (
+                    <>
+                      <div className="glow-ring glow-ring-1"></div>
+                      <div className="glow-ring glow-ring-2"></div>
+                      <div className="glow-ring glow-ring-3"></div>
+                    </>
+                  )}
+                </div>
               </div>
             ) : (
               <>
                  {/* Match Revealed - Combined Card */}
-                 <div className="mb-8 rounded-2xl border border-[#4a6b5a]/30 bg-linear-to-br from-[#1a2f25]/50 to-[#0f1f18]/50 p-8 backdrop-blur-sm transition-all duration-500 animate-in fade-in slide-in-from-bottom-4">
+                 <div className="mb-8 rounded-2xl border border-[#4a6b5a]/30 bg-linear-to-br from-[#1a2f25]/50 to-[#0f1f18]/50 p-8 backdrop-blur-sm transition-all duration-500 match-revealed reveal-content zoom-out-content">
                    <div className="mb-6 flex items-center gap-6">
                      <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-[#4a6b5a] to-[#5a7b6a] text-4xl select-none transition-transform duration-300 hover:scale-110">
                        {matchInfo.matchedWith.gender === "erkek" ? "♂️" : matchInfo.matchedWith.gender === "kadin" ? "♀️" : "⚧️"}

@@ -210,7 +210,7 @@ export default function ProfilePage() {
             </div>
 
             {/* Match Status Card */}
-            <div className="mb-6 rounded-2xl border-2 border-[#4a6b5a]/50 bg-linear-to-br from-[#1a2f25]/60 to-[#0f1f18]/60 p-8 backdrop-blur-sm relative overflow-hidden pulse-glow">
+            <div className="mb-6 rounded-2xl border-2 border-[#4a6b5a]/50 bg-linear-to-br from-[#1a2f25]/60 to-[#0f1f18]/60 p-8 backdrop-blur-sm relative overflow-hidden pulse-glow fast-pulse-scale">
               {/* Animated gradient background overlay */}
               <div className="absolute inset-0 opacity-30 pointer-events-none">
                 <div className="absolute inset-0 bg-linear-to-br from-[#d4c494]/20 via-[#ffd700]/10 to-[#4a6b5a]/20 animate-gradient-shift" style={{
