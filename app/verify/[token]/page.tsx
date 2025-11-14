@@ -23,7 +23,7 @@ export default function VerifyTokenPage() {
     setError(null);
 
     try {
-      const response = await fetch(`https://api.yildizliagac.com/api/v1/auth/verify/${token}`, {
+      const response = await fetch(`https://api.yildizliagac.com/api/v1/auth/verify?token=${token}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
