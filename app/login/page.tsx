@@ -39,12 +39,41 @@ export default function LoginPage() {
         }),
       });
 
+      // Handle 403 Forbidden (wrong credentials)
+      if (response.status === 403) {
+        setError("E-posta adresi veya şifre hatalı. Lütfen bilgilerinizi kontrol edip tekrar deneyin.");
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Handle other non-OK responses
+      if (!response.ok) {
+        // Try to parse error message from response
+        let errorMessage = "Giriş başarısız oldu. Lütfen daha sonra tekrar deneyin.";
+        try {
+          const errorResult = await response.json();
+          errorMessage = errorResult.message || errorMessage;
+        } catch {
+          // If response is not JSON, use default message
+          if (response.status === 401) {
+            errorMessage = "E-posta adresi veya şifre hatalı. Lütfen bilgilerinizi kontrol edip tekrar deneyin.";
+          } else if (response.status >= 500) {
+            errorMessage = "Sunucu hatası oluştu. Lütfen daha sonra tekrar deneyin.";
+          }
+        }
+        setError(errorMessage);
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Parse successful response
       const result = await response.json();
 
-      if (response.ok && result.success) {
-        // Store token if provided
-        if (result.data?.token) {
-          localStorage.setItem("token", result.data.token);
+      if (result.success) {
+        // Store token if provided (could be in result.data as string or result.data.token)
+        const token = typeof result.data === 'string' ? result.data : result.data?.token;
+        if (token) {
+          localStorage.setItem("token", token);
         }
         // Store user data if provided
         if (result.data?.user) {
@@ -54,12 +83,17 @@ export default function LoginPage() {
         // Login successful - redirect to profile page
         router.push("/profile");
       } else {
-        // Login failed
+        // Login failed with success: false
         setError(result.message || "Giriş başarısız oldu. Email ve şifrenizi kontrol ediniz.");
       }
     } catch (error) {
       console.error("Login error:", error);
-      setError("Bir hata oluştu. Lütfen daha sonra tekrar deneyin.");
+      // Handle network errors or other exceptions
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        setError("İnternet bağlantınızı kontrol edin. Sunucuya bağlanılamıyor.");
+      } else {
+        setError("Bir hata oluştu. Lütfen daha sonra tekrar deneyin.");
+      }
     } finally {
       setIsSubmitting(false);
     }
