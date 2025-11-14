@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kaydınızı Tamamlayın - Yıldızlı Ağaç</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap">
+    <style type="text/css">
+        /* Base styles */
+        body, p, div, h1, h2, h3, a, span {
+            /* Using Montserrat with good fallbacks */
+            font-family: 'Montserrat', Arial, 'Helvetica Neue', Helvetica, sans-serif;
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #f9fafb; /* Snowy off-white background */
+        }
+
+        /* Client-specific resets */
+        img {
+            border: 0;
+            height: auto;
+            line-height: 100%;
+            outline: none;
+            text-decoration: none;
+            -ms-interpolation-mode: bicubic;
+            max-width: 100%;
+        }
+        /* iOS link color fix */
+        a[x-apple-data-detectors] {
+            color: inherit !important;
+            text-decoration: none !important;
+        }
+
+        /* Responsive styles */
+        @media screen and (max-width: 600px) {
+            .email-container {
+                width: 100% !important;
+                max-width: 100% !important;
+            }
+            .content-padding {
+                padding: 20px 15px !important;
+            }
+            .header-padding {
+                padding: 20px 15px 10px !important;
+            }
+            .footer-padding {
+                padding: 20px 15px !important;
+            }
+            .h1-size {
+                font-size: 26px !important;
+            }
+            .h2-size {
+                font-size: 20px !important;
+            }
+            .body-text {
+                font-size: 15px !important;
+                line-height: 22px !important;
+            }
+            .button-padding {
+                padding: 12px 25px !important;
+            }
+        }
+    </style>
+</head>
+<body style="margin: 0; padding: 0; background-color: #f9fafb;">
+<div style="display: none; max-height: 0px; overflow: hidden;">
+    Yıldızlı Ağaç'a katılın ve bu yılki Secret Santa heyecanına ortak olun!
+</div>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%" style="min-width: 100%;">
+    <tr>
+        <td align="center" valign="top" style="padding: 40px 10px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="600" class="email-container" style="max-width: 600px; background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border: 1px solid #e5e7eb;">
+                <tr>
+                    <td align="center" class="header-padding" style="padding: 30px 20px 15px; border-radius: 12px 12px 0 0;">
+                        <span style="font-size: 40px; line-height: 40px;">🎁</span>
+
+                        <h1 class="h1-size" style="margin: 15px 0 0; font-family: 'Montserrat', Arial, sans-serif; font-size: 32px; color: #166534; font-weight: 700;">
+                            Yıldızlı Ağaç
+                        </h1>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td style="height: 1px; background-color: #e5e7eb; padding: 0;"></td>
+                </tr>
+
+                <tr>
+                    <td class="content-padding" style="padding: 40px 30px;">
+                        <h2 class="h2-size" style="margin: 0 0 20px; color: #111827; font-size: 24px; font-weight: 700; text-align: center; font-family: 'Montserrat', Arial, sans-serif;">Çekilişe Hoş Geldin!</h2>
+
+                        <p class="body-text" style="margin: 0 0 25px; color: #374151; font-size: 16px; line-height: 24px; text-align: center;">
+                            YTÜ Secret Santa etkinliği <strong>Yıldızlı Ağaç</strong>'a kayıt olduğun için teşekkür ederiz! 🎄<br><br>
+                            Kura çekimine katılabilmek ve hediyeleşme heyecanına ortak olabilmek için aşağıdaki butona tıklayarak hesabını doğrulaman gerekiyor.
+                        </p>
+
+
+                        <table border="0" cellpadding="0" cellspacing="0" width="100%" style="min-width: 100%;">
+                            <tr>
+                                <td align="center" style="padding: 25px 0;">
+                                    <table border="0" cellpadding="0" cellspacing="0" style="background-color: #dc2626; border-radius: 50px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                                        <tr>
+                                            <td align="center" valign="middle" style="padding: 15px 30px;">
+                                                <a href="{{verification_url}}"
+                                                   target="_blank"
+                                                   style="font-size: 16px; font-weight: bold; color: #ffffff; text-decoration: none; font-family: 'Montserrat', Arial, sans-serif; display: inline-block;">
+                                                    Kaydımı Tamamla
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <p style="margin: 25px 0 0; color: #4b5563; font-size: 14px; line-height: 21px; text-align: center;">
+                            Eğer bu kaydı sen oluşturmadıysan, bu e-postayı dikkate almayabilirsin.
+                        </p>
+
+                        <p style="margin: 25px 0 0; color: #6b7280; font-size: 13px; line-height: 20px; text-align: center;">
+                            Butona tıklayamazsan, aşağıdaki linki kopyalayıp tarayıcına yapıştırabilirsin:<br>
+                            <a href="{{verification_url}}" style="color: #166534; text-decoration: underline; word-break: break-all;">{{verification_url}}</a>
+                        </p>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td style="background-color: #f3f4f6; border-top: 1px solid #e5e7eb; border-radius: 0 0 12px 12px; padding: 30px 20px; text-align: center;">
+                        <p style="margin: 0 0 15px; color: #4b5563; font-size: 14px;">
+                            YTÜ öğrencileri için, öğrenciler tarafından geliştirilmiş Secret Santa platformu.
+                        </p>
+
+                        <p style="margin: 0; color: #6b7280; font-size: 13px;">
+                            &copy; 2025 Yıldızlı Ağaç. Tüm hakları saklıdır.<br>
+                            YTÜ Davutpaşa Kampüsü
+                        </p>
+
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+</body>
+</html>

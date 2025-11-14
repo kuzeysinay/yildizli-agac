@@ -2,10 +2,15 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 
 export default function Home() {
   const [isAuth, setIsAuth] = useState<boolean | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
+  const [activeStep, setActiveStep] = useState(0);
+  const [isScrolling, setIsScrolling] = useState(false);
+  const howItWorksRef = useRef<HTMLDivElement>(null);
+  const stepRefs = [useRef<HTMLDivElement>(null), useRef<HTMLDivElement>(null), useRef<HTMLDivElement>(null), useRef<HTMLDivElement>(null), useRef<HTMLDivElement>(null)];
 
   useEffect(() => {
     let cancelled = false;
@@ -35,10 +40,106 @@ export default function Home() {
     };
   }, []);
 
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 640);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Scroll snap and auto-scroll functionality for mobile
+  useEffect(() => {
+    if (!isMobile || !howItWorksRef.current) return;
+
+    const container = howItWorksRef.current;
+    let touchStartY = 0;
+    let touchEndY = 0;
+    let scrollTimeout: NodeJS.Timeout | null = null;
+
+    const handleTouchStart = (e: TouchEvent) => {
+      touchStartY = e.touches[0].clientY;
+    };
+
+    const handleTouchEnd = (e: TouchEvent) => {
+      touchEndY = e.changedTouches[0].clientY;
+      const swipeDistance = touchStartY - touchEndY;
+      const minSwipeDistance = 50;
+
+      if (Math.abs(swipeDistance) > minSwipeDistance && !isScrolling) {
+        setIsScrolling(true);
+        
+        // Find current step based on scroll position
+        const containerRect = container.getBoundingClientRect();
+        const containerTop = containerRect.top + window.scrollY;
+        const currentScroll = window.scrollY;
+        const relativeScroll = currentScroll - containerTop;
+
+        let currentStep = 0;
+        stepRefs.forEach((ref, index) => {
+          if (ref.current) {
+            const stepTop = ref.current.offsetTop;
+            if (relativeScroll >= stepTop - 100) {
+              currentStep = index;
+            }
+          }
+        });
+
+        if (swipeDistance > 0 && currentStep < stepRefs.length - 1) {
+          // Swipe up - go to next step
+          const nextStep = currentStep + 1;
+          stepRefs[nextStep].current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          setActiveStep(nextStep);
+        } else if (swipeDistance < 0 && currentStep > 0) {
+          // Swipe down - go to previous step
+          const prevStep = currentStep - 1;
+          stepRefs[prevStep].current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          setActiveStep(prevStep);
+        }
+
+        setTimeout(() => setIsScrolling(false), 1000);
+      }
+    };
+
+    // Intersection Observer for step visibility
+    const observerOptions = {
+      root: null,
+      rootMargin: '-20% 0px -20% 0px',
+      threshold: 0.5,
+    };
+
+    const observerCallback = (entries: IntersectionObserverEntry[]) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          const stepIndex = stepRefs.findIndex((ref) => ref.current === entry.target);
+          if (stepIndex !== -1) {
+            setActiveStep(stepIndex);
+          }
+        }
+      });
+    };
+
+    const observer = new IntersectionObserver(observerCallback, observerOptions);
+    stepRefs.forEach((ref) => {
+      if (ref.current) observer.observe(ref.current);
+    });
+
+    container.addEventListener('touchstart', handleTouchStart);
+    container.addEventListener('touchend', handleTouchEnd);
+
+    return () => {
+      container.removeEventListener('touchstart', handleTouchStart);
+      container.removeEventListener('touchend', handleTouchEnd);
+      observer.disconnect();
+      if (scrollTimeout !== null) clearTimeout(scrollTimeout);
+    };
+  }, [isMobile, isScrolling]);
+
   return (
-    <div className="relative min-h-screen overflow-hidden bg-linear-to-b from-[#0a1810] via-[#0d1f18] to-[#0a1810] text-white font-(family-name:--font-work-sans)">
+    <div className="relative min-h-screen bg-linear-to-b from-[#0a1810] via-[#0d1f18] to-[#0a1810] text-white font-(family-name:--font-work-sans)" style={{ overscrollBehavior: 'none' }}>
       {/* Background Layer - Snowflakes */}
-      <div className="fixed inset-0 z-0 pointer-events-none">
+      <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
       {/* Animated Snowflakes */}
       <div className="snowflake" style={{left: '10%', animationDuration: '10s', animationDelay: '0s'}}>❄</div>
       <div className="snowflake" style={{left: '20%', animationDuration: '12s', animationDelay: '2s', fontSize: '1.5em'}}>❄</div>
@@ -208,58 +309,292 @@ export default function Home() {
               <Link href="/signup" className="rounded-full bg-linear-to-r from-[#4a6b5a] to-[#5a7b6a] px-6 py-3 sm:px-8 sm:py-4 text-base sm:text-lg font-semibold text-white shadow-lg transition-all hover:scale-105 hover:shadow-xl text-center">
                 Katıl
               </Link>
-              <button className="rounded-full border-2 border-[#d4c494]/50 px-6 py-3 sm:px-8 sm:py-4 text-base sm:text-lg font-semibold text-[#d4c494] transition-all hover:border-[#d4c494] hover:bg-[#d4c494]/10">
+              <button 
+                onClick={() => {
+                  howItWorksRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }}
+                className="rounded-full border-2 border-[#d4c494]/50 px-6 py-3 sm:px-8 sm:py-4 text-base sm:text-lg font-semibold text-[#d4c494] transition-all hover:border-[#d4c494] hover:bg-[#d4c494]/10 hover:scale-105 active:scale-95"
+              >
                 Nasıl Çalışır?
               </button>
             </div>
           </div>
         </div>
 
-        {/* Info Section */}
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="mx-auto mt-20 max-w-4xl">
-          <div className="rounded-2xl border border-[#4a6b5a]/30 bg-linear-to-br from-[#1a2f25]/50 to-[#0f1f18]/50 p-8 backdrop-blur-sm sm:p-12">
-            <h3 className="mb-6 text-center text-2xl font-bold sm:text-3xl">
-              Nasıl Katılırım?
-            </h3>
-            <div className="grid gap-6 sm:grid-cols-3">
-              <div className="flex flex-col items-center gap-3 text-center">
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#4a6b5a] text-xl font-bold">
-                  1
-                </div>
-                <h4 className="font-semibold text-[#d4c494]">Kayıt Ol</h4>
-                <p className="text-sm text-gray-400">
-                  YTÜ öğrenci mail adresinle kayıt ol
-                </p>
-              </div>
+        {/* How It Works Section */}
+        <div 
+          ref={howItWorksRef} 
+          className={`container mx-auto px-4 sm:px-6 lg:px-8 scroll-mt-20 ${isMobile ? 'snap-y snap-mandatory' : ''}`}
+          style={isMobile ? { scrollSnapType: 'y mandatory' } : {}}
+        >
+          <div className="mx-auto mt-20 max-w-5xl">
+            <div className="rounded-2xl border border-[#4a6b5a]/30 bg-linear-to-br from-[#1a2f25]/50 to-[#0f1f18]/50 p-8 backdrop-blur-sm sm:p-12 relative overflow-hidden">
+              {/* Animated background decorations */}
+              <div className="absolute top-0 right-0 w-64 h-64 bg-[#d4c494]/5 rounded-full blur-3xl animate-pulse"></div>
+              <div className="absolute bottom-0 left-0 w-48 h-48 bg-[#4a6b5a]/10 rounded-full blur-2xl animate-pulse" style={{ animationDelay: '1s' }}></div>
               
-              <div className="flex flex-col items-center gap-3 text-center">
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#4a6b5a] text-xl font-bold">
-                  2
+              <div className="mb-8 text-center relative z-10">
+                <div className="mb-4 flex items-center justify-center gap-3">
+                  <span className="text-4xl animate-bounce select-none">🎄</span>
+                  <h3 className="text-3xl font-bold sm:text-4xl">
+                    <span className="text-[#d4c494] glow-text">Nasıl Çalışır?</span>
+                  </h3>
+                  <span className="text-4xl animate-bounce select-none" style={{ animationDelay: '0.2s' }}>✨</span>
                 </div>
-                <h4 className="font-semibold text-[#d4c494]">Eşleş</h4>
-                <p className="text-sm text-gray-400">
-                  Sistemimiz seni biriyle eşleştirecek
+                <p className="text-gray-300 text-sm sm:text-base">
+                  Yıldızlı Ağaç hediye değiş-tokuş sisteminin tüm detayları
                 </p>
+                {isMobile && (
+                  <p className="mt-2 text-xs text-[#d4c494]/70 animate-pulse">
+                    👆 Yukarı kaydır, sonraki adıma geç!
+                  </p>
+                )}
               </div>
-              
-              <div className="flex flex-col items-center gap-3 text-center">
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#4a6b5a] text-xl font-bold">
-                  3
+
+              {/* Process Flow */}
+              <div className="mb-12 space-y-8 relative z-10">
+                {/* Step 1 */}
+                <div 
+                  ref={stepRefs[0]}
+                  className={`relative flex flex-col gap-4 sm:flex-row sm:items-start transition-all duration-500 ${isMobile ? 'snap-start min-h-[80vh]' : ''} ${activeStep === 0 ? 'scale-100 opacity-100' : 'opacity-90'}`}
+                  style={isMobile ? { scrollSnapAlign: 'start' } : {}}
+                >
+                  <div className="flex shrink-0 items-center justify-center sm:flex-col">
+                    <div className={`relative flex h-20 w-20 items-center justify-center rounded-full bg-linear-to-br from-[#4a6b5a] to-[#5a7b6a] text-3xl font-bold shadow-xl ring-4 ring-[#4a6b5a]/30 transition-all duration-500 ${activeStep === 0 ? 'scale-110 ring-[#d4c494]/50 animate-pulse' : 'scale-100'}`}>
+                      <span className="relative z-10">1</span>
+                      {activeStep === 0 && (
+                        <div className="absolute inset-0 rounded-full bg-[#d4c494]/20 animate-ping"></div>
+                      )}
+                    </div>
+                    {!isMobile && (
+                      <div className="mx-auto mt-4 h-16 w-0.5 bg-linear-to-b from-[#4a6b5a] to-transparent"></div>
+                    )}
+                  </div>
+                  <div className={`flex-1 rounded-xl border-2 p-6 backdrop-blur-sm transition-all duration-500 ${activeStep === 0 ? 'border-[#d4c494]/50 bg-[#0a1810]/60 shadow-lg shadow-[#d4c494]/10' : 'border-[#4a6b5a]/30 bg-[#0a1810]/40'}`}>
+                    <div className="mb-3 flex items-center gap-3">
+                      <span className={`text-4xl select-none transition-transform duration-500 ${activeStep === 0 ? 'animate-bounce scale-110' : ''}`}>📧</span>
+                      <h4 className="text-xl font-bold text-[#d4c494]">Kayıt ve Doğrulama</h4>
+                    </div>
+                    <p className="mb-3 text-gray-300 leading-relaxed">
+                      YTÜ öğrenci mail adresinle (@std.yildiz.edu.tr) kayıt ol. Mail adresine gönderilen doğrulama linkine tıklayarak hesabını aktifleştir.
+                    </p>
+                    <div className="rounded-lg bg-[#4a6b5a]/10 p-3 border border-[#4a6b5a]/20 relative overflow-hidden">
+                      <div className="absolute inset-0 bg-linear-to-r from-[#d4c494]/5 via-transparent to-[#d4c494]/5 animate-pulse"></div>
+                      <p className="text-xs text-gray-400 relative z-10">
+                        <strong className="text-[#d4c494]">💡 Önemli:</strong> Sadece YTÜ öğrenci mail adresleri kabul edilir. Doğrulama mailini kontrol etmeyi unutma!
+                      </p>
+                    </div>
+                  </div>
                 </div>
-                <h4 className="font-semibold text-[#d4c494]">Hediye Al</h4>
-                <p className="text-sm text-gray-400">
-                  Eşleştiğin kişiye hediye al ve mutluluğu paylaş
-                </p>
+
+                {/* Step 2 */}
+                <div 
+                  ref={stepRefs[1]}
+                  className={`relative flex flex-col gap-4 sm:flex-row sm:items-start transition-all duration-500 ${isMobile ? 'snap-start min-h-[80vh]' : ''} ${activeStep === 1 ? 'scale-100 opacity-100' : 'opacity-90'}`}
+                  style={isMobile ? { scrollSnapAlign: 'start' } : {}}
+                >
+                  <div className="flex shrink-0 items-center justify-center sm:flex-col">
+                    <div className={`relative flex h-20 w-20 items-center justify-center rounded-full bg-linear-to-br from-[#4a6b5a] to-[#5a7b6a] text-3xl font-bold shadow-xl ring-4 ring-[#4a6b5a]/30 transition-all duration-500 ${activeStep === 1 ? 'scale-110 ring-[#d4c494]/50 animate-pulse' : 'scale-100'}`}>
+                      <span className="relative z-10">2</span>
+                      {activeStep === 1 && (
+                        <div className="absolute inset-0 rounded-full bg-[#d4c494]/20 animate-ping"></div>
+                      )}
+                    </div>
+                    {!isMobile && (
+                      <div className="mx-auto mt-4 h-16 w-0.5 bg-linear-to-b from-[#4a6b5a] to-transparent"></div>
+                    )}
+                  </div>
+                  <div className={`flex-1 rounded-xl border-2 p-6 backdrop-blur-sm transition-all duration-500 ${activeStep === 1 ? 'border-[#d4c494]/50 bg-[#0a1810]/60 shadow-lg shadow-[#d4c494]/10' : 'border-[#4a6b5a]/30 bg-[#0a1810]/40'}`}>
+                    <div className="mb-3 flex items-center gap-3">
+                      <span className={`text-4xl select-none transition-transform duration-500 ${activeStep === 1 ? 'animate-bounce scale-110' : ''}`}>🎯</span>
+                      <h4 className="text-xl font-bold text-[#d4c494]">Profil Oluşturma</h4>
+                    </div>
+                    <p className="mb-3 text-gray-300 leading-relaxed">
+                      İlgi alanlarını ve tercihlerini belirt. Bu bilgiler, eşleştiğin kişinin sana uygun bir hediye seçmesine yardımcı olacak.
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      <span className={`rounded-full bg-[#4a6b5a]/30 px-3 py-1 text-xs text-gray-300 border border-[#4a6b5a]/40 transition-all duration-300 ${activeStep === 1 ? 'animate-pulse scale-105' : ''}`}>
+                        ✨ İlgi alanları seçimi
+                      </span>
+                      <span className={`rounded-full bg-[#4a6b5a]/30 px-3 py-1 text-xs text-gray-300 border border-[#4a6b5a]/40 transition-all duration-300 ${activeStep === 1 ? 'animate-pulse scale-105' : ''}`} style={{ animationDelay: '0.1s' }}>
+                        👤 Cinsiyet tercihi
+                      </span>
+                      <span className={`rounded-full bg-[#4a6b5a]/30 px-3 py-1 text-xs text-gray-300 border border-[#4a6b5a]/40 transition-all duration-300 ${activeStep === 1 ? 'animate-pulse scale-105' : ''}`} style={{ animationDelay: '0.2s' }}>
+                        🎁 Hediye tercihleri
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Step 3 */}
+                <div 
+                  ref={stepRefs[2]}
+                  className={`relative flex flex-col gap-4 sm:flex-row sm:items-start transition-all duration-500 ${isMobile ? 'snap-start min-h-[80vh]' : ''} ${activeStep === 2 ? 'scale-100 opacity-100' : 'opacity-90'}`}
+                  style={isMobile ? { scrollSnapAlign: 'start' } : {}}
+                >
+                  <div className="flex shrink-0 items-center justify-center sm:flex-col">
+                    <div className={`relative flex h-20 w-20 items-center justify-center rounded-full bg-linear-to-br from-[#4a6b5a] to-[#5a7b6a] text-3xl font-bold shadow-xl ring-4 ring-[#4a6b5a]/30 transition-all duration-500 ${activeStep === 2 ? 'scale-110 ring-[#d4c494]/50 animate-pulse' : 'scale-100'}`}>
+                      <span className="relative z-10">3</span>
+                      {activeStep === 2 && (
+                        <div className="absolute inset-0 rounded-full bg-[#d4c494]/20 animate-ping"></div>
+                      )}
+                    </div>
+                    {!isMobile && (
+                      <div className="mx-auto mt-4 h-16 w-0.5 bg-linear-to-b from-[#4a6b5a] to-transparent"></div>
+                    )}
+                  </div>
+                  <div className={`flex-1 rounded-xl border-2 p-6 backdrop-blur-sm transition-all duration-500 ${activeStep === 2 ? 'border-[#d4c494]/50 bg-[#0a1810]/60 shadow-lg shadow-[#d4c494]/10' : 'border-[#4a6b5a]/30 bg-[#0a1810]/40'}`}>
+                    <div className="mb-3 flex items-center gap-3">
+                      <span className={`text-4xl select-none transition-transform duration-500 ${activeStep === 2 ? 'animate-bounce scale-110' : ''}`}>🎁</span>
+                      <h4 className="text-xl font-bold text-[#d4c494]">Otomatik Eşleşme</h4>
+                    </div>
+                    <p className="mb-3 text-gray-300 leading-relaxed">
+                      Sistemimiz seni algoritma ile bir Yıldızlıyla eşleştirecek. Eşleşme sonucunda:
+                    </p>
+                    <ul className="space-y-3 text-sm text-gray-300">
+                      <li className={`flex items-start gap-2 transition-all duration-300 ${activeStep === 2 ? 'translate-x-2' : ''}`}>
+                        <span className="mt-0.5 text-[#d4c494] text-lg">✨</span>
+                        <span>Eşleştiğin kişinin <strong className="text-[#d4c494]">ilgi alanlarını</strong> göreceksin</span>
+                      </li>
+                      <li className={`flex items-start gap-2 transition-all duration-300 ${activeStep === 2 ? 'translate-x-2' : ''}`} style={{ transitionDelay: '0.1s' }}>
+                        <span className="mt-0.5 text-[#d4c494] text-lg">🔒</span>
+                        <span><strong className="text-[#d4c494]">Tam isim gizli</strong> kalacak (sadece baş harfler gösterilir)</span>
+                      </li>
+                      <li className={`flex items-start gap-2 transition-all duration-300 ${activeStep === 2 ? 'translate-x-2' : ''}`} style={{ transitionDelay: '0.2s' }}>
+                        <span className="mt-0.5 text-[#d4c494] text-lg">📅</span>
+                        <span>Hediye teslim <strong className="text-[#d4c494]">tarihini</strong> öğreneceksin</span>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+
+                {/* Step 4 */}
+                <div 
+                  ref={stepRefs[3]}
+                  className={`relative flex flex-col gap-4 sm:flex-row sm:items-start transition-all duration-500 ${isMobile ? 'snap-start min-h-[80vh]' : ''} ${activeStep === 3 ? 'scale-100 opacity-100' : 'opacity-90'}`}
+                  style={isMobile ? { scrollSnapAlign: 'start' } : {}}
+                >
+                  <div className="flex shrink-0 items-center justify-center sm:flex-col">
+                    <div className={`relative flex h-20 w-20 items-center justify-center rounded-full bg-linear-to-br from-[#4a6b5a] to-[#5a7b6a] text-3xl font-bold shadow-xl ring-4 ring-[#4a6b5a]/30 transition-all duration-500 ${activeStep === 3 ? 'scale-110 ring-[#d4c494]/50 animate-pulse' : 'scale-100'}`}>
+                      <span className="relative z-10">4</span>
+                      {activeStep === 3 && (
+                        <div className="absolute inset-0 rounded-full bg-[#d4c494]/20 animate-ping"></div>
+                      )}
+                    </div>
+                    {!isMobile && (
+                      <div className="mx-auto mt-4 h-16 w-0.5 bg-linear-to-b from-[#4a6b5a] to-transparent"></div>
+                    )}
+                  </div>
+                  <div className={`flex-1 rounded-xl border-2 p-6 backdrop-blur-sm transition-all duration-500 ${activeStep === 3 ? 'border-[#d4c494]/50 bg-[#0a1810]/60 shadow-lg shadow-[#d4c494]/10' : 'border-[#4a6b5a]/30 bg-[#0a1810]/40'}`}>
+                    <div className="mb-3 flex items-center gap-3">
+                      <span className={`text-4xl select-none transition-transform duration-500 ${activeStep === 3 ? 'animate-bounce scale-110' : ''}`}>📅</span>
+                      <h4 className="text-xl font-bold text-[#d4c494]">Buluşma Zamanı Belirleme</h4>
+                    </div>
+                    <p className="mb-3 text-gray-300 leading-relaxed">
+                      Eşleştiğin kişiyle uygun olduğun <strong className="text-[#d4c494]">3 farklı gün ve saat</strong> öner. Sistem otomatik olarak ortak zamanları bulacak ve buluşma zamanınızı belirleyeceksiniz.
+                    </p>
+                    <div className="rounded-lg bg-green-600/10 p-3 border border-green-600/30 relative overflow-hidden">
+                      <div className="absolute inset-0 bg-linear-to-r from-green-500/10 via-transparent to-green-500/10 animate-pulse"></div>
+                      <p className="text-xs text-green-300 relative z-10">
+                        <strong className="text-green-400">💡 İpucu:</strong> Karşı tarafın önerdiği günleri seçerseniz eşleşme şansınız artar! 🎯
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Step 5 */}
+                <div 
+                  ref={stepRefs[4]}
+                  className={`relative flex flex-col gap-4 sm:flex-row sm:items-start transition-all duration-500 ${isMobile ? 'snap-start min-h-[80vh]' : ''} ${activeStep === 4 ? 'scale-100 opacity-100' : 'opacity-90'}`}
+                  style={isMobile ? { scrollSnapAlign: 'start' } : {}}
+                >
+                  <div className="flex shrink-0 items-center justify-center sm:flex-col">
+                    <div className={`relative flex h-20 w-20 items-center justify-center rounded-full bg-linear-to-br from-[#4a6b5a] to-[#5a7b6a] text-3xl font-bold shadow-xl ring-4 ring-[#4a6b5a]/30 transition-all duration-500 ${activeStep === 4 ? 'scale-110 ring-[#d4c494]/50 animate-pulse' : 'scale-100'}`}>
+                      <span className="relative z-10">5</span>
+                      {activeStep === 4 && (
+                        <div className="absolute inset-0 rounded-full bg-[#d4c494]/20 animate-ping"></div>
+                      )}
+                    </div>
+                  </div>
+                  <div className={`flex-1 rounded-xl border-2 p-6 backdrop-blur-sm transition-all duration-500 ${activeStep === 4 ? 'border-[#d4c494]/50 bg-[#0a1810]/60 shadow-lg shadow-[#d4c494]/10' : 'border-[#4a6b5a]/30 bg-[#0a1810]/40'}`}>
+                    <div className="mb-3 flex items-center gap-3">
+                      <span className={`text-4xl select-none transition-transform duration-500 ${activeStep === 4 ? 'animate-bounce scale-110' : ''}`}>🎄</span>
+                      <h4 className="text-xl font-bold text-[#d4c494]">Hediye Hazırlığı ve Teslim</h4>
+                    </div>
+                    <p className="mb-3 text-gray-300 leading-relaxed">
+                      Belirlenen tarihte buluşup hediyeni teslim et. Bu bir <strong className="text-yellow-400">sürpriz</strong> olmalı - kime hediye aldığını kimseye söyleme! 🤫
+                    </p>
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <div className={`rounded-lg bg-[#4a6b5a]/10 p-3 border border-[#4a6b5a]/20 transition-all duration-300 ${activeStep === 4 ? 'scale-105 shadow-md' : ''}`}>
+                        <p className="text-xs font-semibold text-[#d4c494] mb-1 flex items-center gap-1">
+                          <span>💰</span> Bütçe
+                        </p>
+                        <p className="text-xs text-gray-400">100-300 TL arası</p>
+                      </div>
+                      <div className={`rounded-lg bg-[#4a6b5a]/10 p-3 border border-[#4a6b5a]/20 transition-all duration-300 ${activeStep === 4 ? 'scale-105 shadow-md' : ''}`} style={{ transitionDelay: '0.1s' }}>
+                        <p className="text-xs font-semibold text-[#d4c494] mb-1 flex items-center gap-1">
+                          <span>📦</span> Teslim
+                        </p>
+                        <p className="text-xs text-gray-400">Belirlenen tarihte</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Important Notes */}
+              <div className="mt-12 space-y-4">
+                <h4 className="text-xl font-bold text-[#d4c494] text-center mb-6">Önemli Notlar</h4>
+                
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="rounded-xl border border-yellow-600/30 bg-yellow-600/10 p-5">
+                    <div className="mb-2 flex items-center gap-2">
+                      <span className="text-2xl select-none">🔒</span>
+                      <h5 className="font-semibold text-yellow-400">Gizlilik</h5>
+                    </div>
+                    <p className="text-sm text-gray-300">
+                      Kime hediye aldığın sadece sen bileceksin. Eşleştiğin kişi de senin kim olduğunu bilmeyecek - bu bir sürpriz!
+                    </p>
+                  </div>
+
+                  <div className="rounded-xl border border-blue-600/30 bg-blue-600/10 p-5">
+                    <div className="mb-2 flex items-center gap-2">
+                      <span className="text-2xl select-none">⏰</span>
+                      <h5 className="font-semibold text-blue-400">Zamanlama</h5>
+                    </div>
+                    <p className="text-sm text-gray-300">
+                      Eşleşme sonrası belirlenen tarihte buluşup hediyeleri değiş-tokuş edeceksiniz. Tarihleri kaçırma!
+                    </p>
+                  </div>
+
+                  <div className="rounded-xl border border-green-600/30 bg-green-600/10 p-5">
+                    <div className="mb-2 flex items-center gap-2">
+                      <span className="text-2xl select-none">💝</span>
+                      <h5 className="font-semibold text-green-400">Hediye Seçimi</h5>
+                    </div>
+                    <p className="text-sm text-gray-300">
+                      İlgi alanlarına göre düşünceli bir hediye seç. Bütçe: 100-300 TL arası. Yaratıcı ol!
+                    </p>
+                  </div>
+
+                  <div className="rounded-xl border border-purple-600/30 bg-purple-600/10 p-5">
+                    <div className="mb-2 flex items-center gap-2">
+                      <span className="text-2xl select-none">🎉</span>
+                      <h5 className="font-semibold text-purple-400">Eğlence</h5>
+                    </div>
+                    <p className="text-sm text-gray-300">
+                      Bu bir yılbaşı kutlaması! Eğlen, yeni arkadaşlıklar kur ve yılbaşı ruhunu yaşa!
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
           </div>
         </div>
       </main>
 
       {/* Footer */}
-      <footer className="container relative z-10 mx-auto px-4 py-8 text-center text-sm text-gray-500 sm:px-6 lg:px-8">
+      <footer className="container relative z-10 mx-auto px-4 py-8 pb-12 text-center text-sm text-gray-500 sm:px-6 lg:px-8">
         <p>Yıldız Teknik Üniversitesi Öğrenci Topluluğu • 2026</p>
       </footer>
       </div>

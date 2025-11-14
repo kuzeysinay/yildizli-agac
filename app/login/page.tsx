@@ -199,9 +199,9 @@ export default function LoginPage() {
                       />
                       <span className="text-gray-400">Beni hatırla</span>
                     </label>
-                    <a href="#" className="text-[#d4c494] hover:text-[#e4d4a4] transition-colors">
+                    <Link href="/reset-password" className="text-[#d4c494] hover:text-[#e4d4a4] transition-colors">
                       Şifremi unuttum
-                    </a>
+                    </Link>
                   </div>
 
                   <button

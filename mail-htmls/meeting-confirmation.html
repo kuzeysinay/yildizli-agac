@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>Buluşmanız Ayarlandı! - Yıldızlı Ağaç</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap">
+    <style>/* Stiller diğerleriyle aynı */</style>
+</head>
+<body style="margin: 0; padding: 0; background-color: #f9fafb;">
+<div style="display: none; max-height: 0px; overflow: hidden;">
+    Harika haber! Secret Santa buluşmanız için ortak bir zaman ve yer bulundu.
+</div>
+<table border="0" cellpadding="0" cellspacing="0" width="100%" style="min-width: 100%;">
+    <tr>
+        <td align="center" valign="top" style="padding: 40px 10px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="600" class="email-container" style="max-width: 600px; background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border: 1px solid #e5e7eb;">
+                <tr>
+                    <td align="center" style="padding: 30px 20px 15px; border-radius: 12px 12px 0 0;">
+                        <span style="font-size: 40px; line-height: 40px;">📍</span>
+                        <h1 style="margin: 15px 0 0; font-family: 'Montserrat', Arial, sans-serif; font-size: 32px; color: #166534; font-weight: 700;">Yıldızlı Ağaç</h1>
+                    </td>
+                </tr>
+                <tr><td style="height: 1px; background-color: #e5e7eb; padding: 0;"></td></tr>
+                <tr>
+                    <td style="padding: 40px 30px;">
+                        <h2 style="margin: 0 0 20px; color: #111827; font-size: 24px; font-weight: 700; text-align: center;">Buluşma Zamanı ve Yeri Belli Oldu!</h2>
+                        <p style="margin: 0 0 25px; color: #374151; font-size: 16px; line-height: 24px; text-align: center;">
+                            Merhaba {{user_name}},<br><br>Harika haber! Eşleşmen ile önerdiğiniz zaman aralıkları arasında ortak bir zaman bulundu ve sistem tarafından bir buluşma lokasyonu atandı.
+                        </p>
+
+                        <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; margin: 20px 0;">
+                            <tr>
+                                <td style="padding: 20px; text-align: left; font-size: 16px;">
+                                    <p style="margin: 0 0 10px;"><strong>🗓️ Tarih:</strong> {{meeting_date}}</p>
+                                    <p style="margin: 0 0 10px;"><strong>⏰ Saat:</strong> {{meeting_time}}</p>
+                                    <p style="margin: 0;"><strong>📍 Yer:</strong> {{meeting_location}}</p>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <p style="margin: 25px 0 25px; color: #374151; font-size: 16px; line-height: 24px; text-align: center;">
+                            Hediyeni hazırlamayı ve o gün o saatte orada olmayı unutma!
+                        </p>
+
+                        <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                            <tr>
+                                <td align="center" style="padding: 10px 0;">
+                                    <table border="0" cellpadding="0" cellspacing="0" style="background-color: #dc2626; border-radius: 50px;">
+                                        <tr>
+                                            <td align="center" valign="middle" style="padding: 15px 30px;">
+                                                <a href="{{cta_url}}" target="_blank" style="font-size: 16px; font-weight: bold; color: #ffffff; text-decoration: none; display: inline-block;">Buluşma Detayları</a>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="background-color: #f3f4f6; border-top: 1px solid #e5e7eb; border-radius: 0 0 12px 12px; padding: 30px 20px; text-align: center;">
+                        <p style="margin: 0 0 15px; color: #4b5563; font-size: 14px;">YTÜ öğrencileri için, öğrenciler tarafından geliştirilmiş Secret Santa platformu.</p>
+                        <p style="margin: 0; color: #6b7280; font-size: 13px;">&copy; 2025 Yıldızlı Ağaç. Tüm hakları saklıdır.</p>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+</body>
+</html>
