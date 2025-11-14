@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
 
 interface Interest {
@@ -26,15 +26,33 @@ export default function SignupPage() {
     interests: [] as number[], // Store interest IDs
   });
 
+  // Refs to track abort controller and timeout for cleanup
+  const abortControllerRef = useRef<AbortController | null>(null);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
   // Fetch interests function
   const fetchInterests = useCallback(async () => {
+    // Clean up any existing request
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+
     try {
       setLoadingInterests(true);
       setInterestsError(null);
       
-      // Add timeout to prevent hanging
+      // Create new abort controller and timeout
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+      abortControllerRef.current = controller;
+      
+      timeoutRef.current = setTimeout(() => {
+        if (!controller.signal.aborted) {
+          controller.abort();
+        }
+      }, 10000); // 10 second timeout
       
       const response = await fetch("https://api.yildizliagac.com/api/v1/interests/getAllInterests", {
         signal: controller.signal,
@@ -43,7 +61,11 @@ export default function SignupPage() {
         },
       });
       
-      clearTimeout(timeoutId);
+      // Clear timeout on successful response
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -57,16 +79,26 @@ export default function SignupPage() {
         throw new Error(result.message || "İlgi alanları alınamadı");
       }
     } catch (error: any) {
-      console.error("Error fetching interests:", error);
+      // Clear timeout on error
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
       
+      // Handle different error types
       if (error.name === "AbortError") {
-        setInterestsError("İstek zaman aşımına uğradı. Lütfen tekrar deneyin.");
+        // Only set error if this wasn't a cleanup abort (component still mounted)
+        if (abortControllerRef.current) {
+          setInterestsError("İstek zaman aşımına uğradı. Lütfen tekrar deneyin.");
+        }
       } else if (error.message?.includes("Failed to fetch") || error.message?.includes("NetworkError")) {
         setInterestsError("API'ye bağlanılamıyor. İnternet bağlantınızı kontrol edin veya daha sonra tekrar deneyin.");
       } else {
         setInterestsError(error.message || "İlgi alanları yüklenirken bir hata oluştu. Lütfen sayfayı yenileyin.");
       }
     } finally {
+      // Clean up refs
+      abortControllerRef.current = null;
       setLoadingInterests(false);
     }
   }, []);
@@ -74,6 +106,18 @@ export default function SignupPage() {
   // Fetch interests from API on mount
   useEffect(() => {
     fetchInterests();
+    
+    // Cleanup function to abort any pending requests
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+        abortControllerRef.current = null;
+      }
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
+    };
   }, [fetchInterests]);
 
   const filteredInterests = availableInterests.filter((interest) =>
