@@ -46,40 +46,68 @@ export default function ProfilePage() {
   const router = useRouter();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
+  const [pairingData, setPairingData] = useState<any | null>(null);
+  const [isLoadingPairing, setIsLoadingPairing] = useState(true);
+
   useEffect(() => {
     let cancelled = false;
     (async () => {
       setIsLoadingUser(true);
+      setIsLoadingPairing(true);
       try {
         // Get token from localStorage
         const token = localStorage.getItem("token");
-        
+
         const headers: HeadersInit = {
           "Accept": "application/json",
         };
-        
+
         // Add Authorization header if token exists
         if (token) {
           headers["Authorization"] = `Bearer ${token}`;
         }
-        
-        const res = await fetch("https://api.yildizliagac.com/api/v1/users/getCurrentUser", {
+
+        // Fetch User
+        const userRes = await fetch("https://api.yildizliagac.com/api/v1/users/getCurrentUser", {
           method: "GET",
           credentials: "include",
           headers,
         });
-        const data = await res.json().catch(() => null);
-        if (cancelled) return;
-        if (res.ok && data?.success && data?.data) {
-          setCurrentUser(data.data as CurrentUser);
-          setUserError(null);
-        } else {
-          setUserError(data?.message || "Kullanıcı bilgileri alınamadı");
+        const userData = await userRes.json().catch(() => null);
+
+        if (!cancelled) {
+          if (userRes.ok && userData?.success && userData?.data) {
+            setCurrentUser(userData.data as CurrentUser);
+            setUserError(null);
+          } else {
+            setUserError(userData?.message || "Kullanıcı bilgileri alınamadı");
+          }
+          setIsLoadingUser(false);
         }
+
+        // Fetch Pairing
+        const pairingRes = await fetch("https://api.yildizliagac.com/api/v1/pairings/getPairingByUser", {
+          method: "GET",
+          credentials: "include",
+          headers,
+        });
+        const pairingJson = await pairingRes.json().catch(() => null);
+
+        if (!cancelled) {
+          if (pairingRes.ok && pairingJson?.success && pairingJson?.data) {
+            setPairingData(pairingJson.data);
+          } else {
+            setPairingData(null);
+          }
+          setIsLoadingPairing(false);
+        }
+
       } catch (e) {
-        if (!cancelled) setUserError("Ağ hatası: Kullanıcı bilgileri alınamadı");
-      } finally {
-        if (!cancelled) setIsLoadingUser(false);
+        if (!cancelled) {
+          setUserError("Ağ hatası: Kullanıcı bilgileri alınamadı");
+          setIsLoadingUser(false);
+          setIsLoadingPairing(false);
+        }
       }
     })();
     return () => {
@@ -93,16 +121,16 @@ export default function ProfilePage() {
     try {
       // Get token from localStorage
       const token = localStorage.getItem("token");
-      
+
       const headers: HeadersInit = {
         "Accept": "application/json",
       };
-      
+
       // Add Authorization header if token exists
       if (token) {
         headers["Authorization"] = `Bearer ${token}`;
       }
-      
+
       const response = await fetch("https://api.yildizliagac.com/api/v1/auth/logout", {
         method: "POST",
         credentials: "include",
@@ -113,7 +141,7 @@ export default function ProfilePage() {
         // Best-effort: still navigate to login on non-OK, since session might be invalid anyway
         console.error("Logout failed with status:", response.status);
       }
-      
+
       // Clear token from localStorage on logout
       localStorage.removeItem("token");
       localStorage.removeItem("user");
@@ -133,21 +161,21 @@ export default function ProfilePage() {
       {/* Background Layer - Snowflakes */}
       <div className="fixed inset-0 z-0 pointer-events-none">
         {/* Animated Snowflakes */}
-        <div className="snowflake" style={{left: '10%', animationDuration: '10s', animationDelay: '0s'}}>❄</div>
-        <div className="snowflake" style={{left: '20%', animationDuration: '12s', animationDelay: '2s', fontSize: '1.5em'}}>❄</div>
-        <div className="snowflake" style={{left: '30%', animationDuration: '15s', animationDelay: '4s'}}>❄</div>
-        <div className="snowflake" style={{left: '40%', animationDuration: '11s', animationDelay: '1s', fontSize: '1.2em'}}>❄</div>
-        <div className="snowflake" style={{left: '50%', animationDuration: '13s', animationDelay: '3s'}}>❄</div>
-        <div className="snowflake" style={{left: '60%', animationDuration: '14s', animationDelay: '5s', fontSize: '1.3em'}}>❄</div>
-        <div className="snowflake" style={{left: '70%', animationDuration: '12s', animationDelay: '2.5s'}}>❄</div>
-        <div className="snowflake" style={{left: '80%', animationDuration: '11s', animationDelay: '1.5s', fontSize: '1.4em'}}>❄</div>
-        <div className="snowflake" style={{left: '90%', animationDuration: '13s', animationDelay: '4.5s'}}>❄</div>
+        <div className="snowflake" style={{ left: '10%', animationDuration: '10s', animationDelay: '0s' }}>❄</div>
+        <div className="snowflake" style={{ left: '20%', animationDuration: '12s', animationDelay: '2s', fontSize: '1.5em' }}>❄</div>
+        <div className="snowflake" style={{ left: '30%', animationDuration: '15s', animationDelay: '4s' }}>❄</div>
+        <div className="snowflake" style={{ left: '40%', animationDuration: '11s', animationDelay: '1s', fontSize: '1.2em' }}>❄</div>
+        <div className="snowflake" style={{ left: '50%', animationDuration: '13s', animationDelay: '3s' }}>❄</div>
+        <div className="snowflake" style={{ left: '60%', animationDuration: '14s', animationDelay: '5s', fontSize: '1.3em' }}>❄</div>
+        <div className="snowflake" style={{ left: '70%', animationDuration: '12s', animationDelay: '2.5s' }}>❄</div>
+        <div className="snowflake" style={{ left: '80%', animationDuration: '11s', animationDelay: '1.5s', fontSize: '1.4em' }}>❄</div>
+        <div className="snowflake" style={{ left: '90%', animationDuration: '13s', animationDelay: '4.5s' }}>❄</div>
 
         {/* Floating Decorations */}
-        <div className="absolute left-[5%] top-[15%] text-4xl opacity-20 float-decoration" style={{animationDelay: '0s'}}>🎁</div>
-        <div className="absolute right-[8%] top-[25%] text-3xl opacity-20 float-decoration" style={{animationDelay: '1s'}}>🎄</div>
-        <div className="absolute left-[8%] top-[60%] text-3xl opacity-20 float-decoration" style={{animationDelay: '2s'}}>🎅</div>
-        <div className="absolute right-[5%] top-[70%] text-4xl opacity-20 float-decoration" style={{animationDelay: '1.5s'}}>🎁</div>
+        <div className="absolute left-[5%] top-[15%] text-4xl opacity-20 float-decoration" style={{ animationDelay: '0s' }}>🎁</div>
+        <div className="absolute right-[8%] top-[25%] text-3xl opacity-20 float-decoration" style={{ animationDelay: '1s' }}>🎄</div>
+        <div className="absolute left-[8%] top-[60%] text-3xl opacity-20 float-decoration" style={{ animationDelay: '2s' }}>🎅</div>
+        <div className="absolute right-[5%] top-[70%] text-4xl opacity-20 float-decoration" style={{ animationDelay: '1.5s' }}>🎁</div>
       </div>
 
       {/* Content Layer */}
@@ -210,120 +238,140 @@ export default function ProfilePage() {
             </div>
 
             {/* Match Status Card */}
-            <div className="mb-6 rounded-2xl border-2 border-[#4a6b5a]/50 bg-linear-to-br from-[#1a2f25]/60 to-[#0f1f18]/60 p-8 backdrop-blur-sm relative overflow-hidden pulse-glow fast-pulse-scale">
-              {/* Animated gradient background overlay */}
-              <div className="absolute inset-0 opacity-30 pointer-events-none">
-                <div className="absolute inset-0 bg-linear-to-br from-[#d4c494]/20 via-[#ffd700]/10 to-[#4a6b5a]/20 animate-gradient-shift" style={{
-                  backgroundSize: '200% 200%',
-                  animation: 'gradient-shift 4s ease infinite'
-                }}></div>
+            {isLoadingPairing ? (
+              <div className="mb-6 rounded-2xl border border-[#4a6b5a]/30 bg-linear-to-br from-[#1a2f25]/50 to-[#0f1f18]/50 p-8 backdrop-blur-sm">
+                <div className="flex flex-col items-center gap-4">
+                  <div className="skeleton skeleton-circle h-16 w-16 rounded-full"></div>
+                  <div className="skeleton skeleton-text w-48 h-6"></div>
+                  <div className="skeleton skeleton-text w-64 h-4"></div>
+                </div>
               </div>
+            ) : pairingData ? (
+              <div className="mb-6 rounded-2xl border-2 border-[#4a6b5a]/50 bg-linear-to-br from-[#1a2f25]/60 to-[#0f1f18]/60 p-8 backdrop-blur-sm relative overflow-hidden pulse-glow fast-pulse-scale">
+                {/* Animated gradient background overlay */}
+                <div className="absolute inset-0 opacity-30 pointer-events-none">
+                  <div className="absolute inset-0 bg-linear-to-br from-[#d4c494]/20 via-[#ffd700]/10 to-[#4a6b5a]/20 animate-gradient-shift" style={{
+                    backgroundSize: '200% 200%',
+                    animation: 'gradient-shift 4s ease infinite'
+                  }}></div>
+                </div>
 
-              {/* Confetti Background */}
-              <div className="absolute inset-0 pointer-events-none overflow-hidden">
-                {/* Confetti pieces - increased count */}
-                {[...Array(30)].map((_, i) => (
-                  <div
-                    key={`confetti-${i}`}
-                    className="confetti"
+                {/* Confetti Background */}
+                <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                  {/* Confetti pieces - increased count */}
+                  {[...Array(30)].map((_, i) => (
+                    <div
+                      key={`confetti-${i}`}
+                      className="confetti"
+                      style={{
+                        left: `${(i * 3.33) % 100}%`,
+                        animationDelay: `${i * 0.08}s`,
+                        animationDuration: `${2.5 + (i % 4)}s`,
+                        '--confetti-color': ['#d4c494', '#4a6b5a', '#ffd700', '#ff6b6b', '#4ecdc4', '#ff9ff3', '#54a0ff'][i % 7],
+                        backgroundColor: ['#d4c494', '#4a6b5a', '#ffd700', '#ff6b6b', '#4ecdc4', '#ff9ff3', '#54a0ff'][i % 7],
+                        borderRadius: i % 3 === 0 ? '50%' : i % 3 === 1 ? '0' : '20%',
+                        transform: i % 3 === 0 ? 'rotate(45deg)' : i % 3 === 1 ? 'none' : 'rotate(30deg)',
+                      } as React.CSSProperties}
+                    />
+                  ))}
+
+                  {/* Floating celebration emojis - more variety */}
+                  {['🎉', '🎊', '✨', '⭐', '💫', '🌟', '🎈'].map((emoji, i) => (
+                    <div
+                      key={`emoji-${i}`}
+                      className="celebration-emoji"
+                      style={{
+                        left: `${10 + i * 15}%`,
+                        top: `${5 + (i % 4) * 25}%`,
+                        animationDelay: `${i * 0.25}s`,
+                        animationDuration: `${3.5 + (i % 3)}s`,
+                      }}
+                    >
+                      {emoji}
+                    </div>
+                  ))}
+
+                  {/* Sparkles - increased count with stronger glow */}
+                  {[...Array(12)].map((_, i) => (
+                    <div
+                      key={`sparkle-${i}`}
+                      className="sparkle"
+                      style={{
+                        left: `${5 + (i * 8)}%`,
+                        top: `${15 + (i % 5) * 18}%`,
+                        animationDelay: `${i * 0.2}s`,
+                        animationDuration: `${1.2 + (i % 3) * 0.4}s`,
+                      }}
+                    />
+                  ))}
+                </div>
+
+                <div className="relative z-10 flex flex-col items-center text-center">
+                  {/* Animated tree emoji with enhanced glow */}
+                  <div className="mb-6 text-8xl select-none celebration-bounce relative">
+                    <span className="relative z-10">🎄</span>
+                    {/* Glow rings around tree */}
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="absolute w-32 h-32 rounded-full border-2 border-[#d4c494]/30 animate-ping" style={{ animationDuration: '2s' }}></div>
+                      <div className="absolute w-24 h-24 rounded-full border border-[#ffd700]/40 animate-pulse" style={{ animationDuration: '1.5s' }}></div>
+                    </div>
+                  </div>
+
+                  {/* Title with enhanced glow and gradient */}
+                  <div className="mb-2 relative">
+                    <h2 className="text-2xl font-bold glow-text">
+                      Eşleşme Durumu
+                    </h2>
+                    {/* Multiple sparkles around title */}
+                    <span className="absolute -top-2 -right-10 text-xl animate-pulse" style={{ animationDuration: '1s' }}>✨</span>
+                    <span className="absolute -top-1 -left-8 text-lg animate-pulse" style={{ animationDuration: '1.3s', animationDelay: '0.3s' }}>⭐</span>
+                    <span className="absolute top-2 -right-6 text-sm animate-pulse" style={{ animationDuration: '1.2s', animationDelay: '0.6s' }}>💫</span>
+                  </div>
+
+                  <p className="mb-6 text-gray-200 max-w-md font-medium text-lg relative">
+                    <span className="relative z-10">Eşleşmen tamamlandı! 🎉</span>
+                    {/* Subtle glow behind text */}
+                    <span className="absolute inset-0 blur-sm opacity-50 text-[#d4c494] -z-10">Eşleşmen tamamlandı! 🎉</span>
+                  </p>
+
+                  {/* Enhanced button with multiple effects */}
+                  <Link
+                    href="/match"
+                    className="group relative inline-flex items-center gap-2 rounded-full bg-linear-to-r from-[#4a6b5a] to-[#5a7b6a] px-8 py-3 text-lg font-semibold text-white shadow-lg transition-all duration-300 hover:scale-110 hover:shadow-2xl hover:shadow-[#4a6b5a]/50 overflow-hidden"
                     style={{
-                      left: `${(i * 3.33) % 100}%`,
-                      animationDelay: `${i * 0.08}s`,
-                      animationDuration: `${2.5 + (i % 4)}s`,
-                      '--confetti-color': ['#d4c494', '#4a6b5a', '#ffd700', '#ff6b6b', '#4ecdc4', '#ff9ff3', '#54a0ff'][i % 7],
-                      backgroundColor: ['#d4c494', '#4a6b5a', '#ffd700', '#ff6b6b', '#4ecdc4', '#ff9ff3', '#54a0ff'][i % 7],
-                      borderRadius: i % 3 === 0 ? '50%' : i % 3 === 1 ? '0' : '20%',
-                      transform: i % 3 === 0 ? 'rotate(45deg)' : i % 3 === 1 ? 'none' : 'rotate(30deg)',
-                    } as React.CSSProperties}
-                  />
-                ))}
-                
-                {/* Floating celebration emojis - more variety */}
-                {['🎉', '🎊', '✨', '⭐', '💫', '🌟', '🎈'].map((emoji, i) => (
-                  <div
-                    key={`emoji-${i}`}
-                    className="celebration-emoji"
-                    style={{
-                      left: `${10 + i * 15}%`,
-                      top: `${5 + (i % 4) * 25}%`,
-                      animationDelay: `${i * 0.25}s`,
-                      animationDuration: `${3.5 + (i % 3)}s`,
+                      boxShadow: '0 0 20px rgba(74, 107, 90, 0.4), 0 0 40px rgba(212, 196, 148, 0.2)',
                     }}
                   >
-                    {emoji}
-                  </div>
-                ))}
-                
-                {/* Sparkles - increased count with stronger glow */}
-                {[...Array(12)].map((_, i) => (
-                  <div
-                    key={`sparkle-${i}`}
-                    className="sparkle"
-                    style={{
-                      left: `${5 + (i * 8)}%`,
-                      top: `${15 + (i % 5) * 18}%`,
-                      animationDelay: `${i * 0.2}s`,
-                      animationDuration: `${1.2 + (i % 3) * 0.4}s`,
-                    }}
-                  />
-                ))}
-              </div>
+                    {/* Multiple shine effects */}
+                    <div className="absolute inset-0 bg-linear-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+                    <div className="absolute inset-0 bg-linear-to-r from-[#ffd700]/20 via-transparent to-[#ffd700]/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
 
-              <div className="relative z-10 flex flex-col items-center text-center">
-                {/* Animated tree emoji with enhanced glow */}
-                <div className="mb-6 text-8xl select-none celebration-bounce relative">
-                  <span className="relative z-10">🎄</span>
-                  {/* Glow rings around tree */}
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="absolute w-32 h-32 rounded-full border-2 border-[#d4c494]/30 animate-ping" style={{ animationDuration: '2s' }}></div>
-                    <div className="absolute w-24 h-24 rounded-full border border-[#ffd700]/40 animate-pulse" style={{ animationDuration: '1.5s' }}></div>
-                  </div>
+                    {/* Animated gift emoji */}
+                    <span className="select-none text-xl group-hover:scale-125 transition-transform duration-300 relative z-10 celebration-bounce" style={{ animationDuration: '1.5s' }}>🎁</span>
+                    <span className="relative z-10 font-bold">Eşleşmeni Gör</span>
+
+                    {/* Multiple sparkles around button */}
+                    <span className="absolute -top-3 -left-3 text-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 animate-pulse">✨</span>
+                    <span className="absolute -bottom-3 -right-3 text-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-75 animate-pulse">⭐</span>
+                    <span className="absolute top-0 -right-4 text-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-150 animate-pulse">💫</span>
+                    <span className="absolute bottom-0 -left-4 text-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-200 animate-pulse">🌟</span>
+
+                    {/* Glow ring on hover */}
+                    <div className="absolute inset-0 rounded-full border-2 border-[#ffd700]/0 group-hover:border-[#ffd700]/50 transition-all duration-300 group-hover:shadow-[0_0_30px_rgba(255,215,0,0.5)]"></div>
+                  </Link>
                 </div>
-                
-                {/* Title with enhanced glow and gradient */}
-                <div className="mb-2 relative">
-                  <h2 className="text-2xl font-bold glow-text">
-                    Eşleşme Durumu
-                  </h2>
-                  {/* Multiple sparkles around title */}
-                  <span className="absolute -top-2 -right-10 text-xl animate-pulse" style={{ animationDuration: '1s' }}>✨</span>
-                  <span className="absolute -top-1 -left-8 text-lg animate-pulse" style={{ animationDuration: '1.3s', animationDelay: '0.3s' }}>⭐</span>
-                  <span className="absolute top-2 -right-6 text-sm animate-pulse" style={{ animationDuration: '1.2s', animationDelay: '0.6s' }}>💫</span>
-                </div>
-                
-                <p className="mb-6 text-gray-200 max-w-md font-medium text-lg relative">
-                  <span className="relative z-10">Eşleşmen tamamlandı! 🎉</span>
-                  {/* Subtle glow behind text */}
-                  <span className="absolute inset-0 blur-sm opacity-50 text-[#d4c494] -z-10">Eşleşmen tamamlandı! 🎉</span>
-                </p>
-                
-                {/* Enhanced button with multiple effects */}
-                <Link
-                  href="/match"
-                  className="group relative inline-flex items-center gap-2 rounded-full bg-linear-to-r from-[#4a6b5a] to-[#5a7b6a] px-8 py-3 text-lg font-semibold text-white shadow-lg transition-all duration-300 hover:scale-110 hover:shadow-2xl hover:shadow-[#4a6b5a]/50 overflow-hidden"
-                  style={{
-                    boxShadow: '0 0 20px rgba(74, 107, 90, 0.4), 0 0 40px rgba(212, 196, 148, 0.2)',
-                  }}
-                >
-                  {/* Multiple shine effects */}
-                  <div className="absolute inset-0 bg-linear-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
-                  <div className="absolute inset-0 bg-linear-to-r from-[#ffd700]/20 via-transparent to-[#ffd700]/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                  
-                  {/* Animated gift emoji */}
-                  <span className="select-none text-xl group-hover:scale-125 transition-transform duration-300 relative z-10 celebration-bounce" style={{ animationDuration: '1.5s' }}>🎁</span>
-                  <span className="relative z-10 font-bold">Eşleşmeni Gör</span>
-                  
-                  {/* Multiple sparkles around button */}
-                  <span className="absolute -top-3 -left-3 text-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 animate-pulse">✨</span>
-                  <span className="absolute -bottom-3 -right-3 text-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-75 animate-pulse">⭐</span>
-                  <span className="absolute top-0 -right-4 text-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-150 animate-pulse">💫</span>
-                  <span className="absolute bottom-0 -left-4 text-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-200 animate-pulse">🌟</span>
-                  
-                  {/* Glow ring on hover */}
-                  <div className="absolute inset-0 rounded-full border-2 border-[#ffd700]/0 group-hover:border-[#ffd700]/50 transition-all duration-300 group-hover:shadow-[0_0_30px_rgba(255,215,0,0.5)]"></div>
-                </Link>
               </div>
-            </div>
+            ) : (
+              <div className="mb-6 rounded-2xl border border-[#4a6b5a]/30 bg-linear-to-br from-[#1a2f25]/50 to-[#0f1f18]/50 p-8 backdrop-blur-sm text-center">
+                <div className="mb-4 text-6xl select-none animate-pulse">
+                  ⏳
+                </div>
+                <h2 className="mb-2 text-2xl font-bold text-[#d4c494]">Eşleşme Bekleniyor</h2>
+                <p className="text-gray-400 max-w-md mx-auto">
+                  Eşleşme henüz oluşturulmadı. Lütfen daha sonra tekrar kontrol et.
+                </p>
+              </div>
+            )}
 
             {/* Profile Information */}
             <div className="mb-6 rounded-2xl border border-[#4a6b5a]/30 bg-linear-to-br from-[#1a2f25]/50 to-[#0f1f18]/50 p-8 backdrop-blur-sm">
@@ -362,29 +410,12 @@ export default function ProfilePage() {
               </div>
             </div>
 
-            {/* Gift Preferences */}
-            <div className="mb-6 rounded-2xl border border-[#4a6b5a]/30 bg-linear-to-br from-[#1a2f25]/50 to-[#0f1f18]/50 p-8 backdrop-blur-sm">
-              <h2 className="mb-4 text-2xl font-bold">Hediye Tercihlerim</h2>
-              <p className="mb-4 text-gray-400">
-                Hediye verecek kişinin sana uygun bir hediye seçmesine yardımcı olmak için tercihlerini belirt.
-              </p>
-              <button className="rounded-full border-2 border-[#d4c494]/50 px-6 py-3 text-sm font-semibold text-[#d4c494] transition-all hover:border-[#d4c494] hover:bg-[#d4c494]/10">
-                Tercihleri Düzenle
-              </button>
-            </div>
-
             {/* Settings */}
             <div className="rounded-2xl border border-[#4a6b5a]/30 bg-linear-to-br from-[#1a2f25]/50 to-[#0f1f18]/50 p-8 backdrop-blur-sm">
               <h2 className="mb-4 text-2xl font-bold">Ayarlar</h2>
               <div className="space-y-3">
                 <button className="w-full rounded-lg border border-[#4a6b5a]/50 bg-[#0a1810]/50 px-6 py-3 text-left transition-colors hover:border-[#4a6b5a] hover:bg-[#0a1810]/80">
                   Şifremi Değiştir
-                </button>
-                <button className="w-full rounded-lg border border-[#4a6b5a]/50 bg-[#0a1810]/50 px-6 py-3 text-left transition-colors hover:border-[#4a6b5a] hover:bg-[#0a1810]/80">
-                  Bildirim Ayarları
-                </button>
-                <button className="w-full rounded-lg border border-red-600/50 bg-[#0a1810]/50 px-6 py-3 text-left text-red-400 transition-colors hover:border-red-600 hover:bg-red-600/10">
-                  Hesabı Sil
                 </button>
               </div>
             </div>
