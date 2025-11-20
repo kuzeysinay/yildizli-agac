@@ -2,13 +2,23 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 type TimeSlot = {
   date: string;
   hour: string;
 };
 
+interface PairingData {
+  receiverDisplayName: string | null;
+  receiverGender: string | null;
+  receiverInterests: string[] | null;
+}
+
 export default function MatchPage() {
+  const router = useRouter();
+  const [pairingData, setPairingData] = useState<PairingData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [revealed, setRevealed] = useState(false);
   const [isOpening, setIsOpening] = useState(false);
   const [isZooming, setIsZooming] = useState(false);
@@ -23,31 +33,67 @@ export default function MatchPage() {
   const timePickerRefs = useRef<{ [key: number]: HTMLDivElement | null }>({});
   const timePickerButtonRefs = useRef<{ [key: number]: HTMLButtonElement | null }>({});
 
+  useEffect(() => {
+    const fetchPairing = async () => {
+      try {
+        // We rely on the API to return 401/403 if the user is not authenticated
+
+        const res = await fetch("https://api.yildizliagac.com/api/v1/pairings/getPairingByUser", {
+          method: "GET",
+          credentials: "include",
+          headers: {
+            "Accept": "application/json",
+          },
+        });
+
+        if (res.status === 401 || res.status === 403) {
+          router.push("/login");
+          return;
+        }
+
+        const data = await res.json();
+
+        if (res.ok && data.success && data.data) {
+          setPairingData(data.data);
+        } else {
+          router.push("/profile");
+        }
+      } catch (error) {
+        console.error("Error fetching pairing:", error);
+        router.push("/profile");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchPairing();
+  }, [router]);
+
   // Close calendar and time picker when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as Node;
-      
+
       // Handle calendars
       Object.keys(openCalendars).forEach((key) => {
         const index = parseInt(key);
         if (openCalendars[index]) {
           const calendarEl = calendarRefs.current[index];
           const buttonEl = buttonRefs.current[index];
-          
+
           if (calendarEl && !calendarEl.contains(target) && buttonEl && !buttonEl.contains(target)) {
             setOpenCalendars({ ...openCalendars, [index]: false });
           }
         }
       });
-      
+
       // Handle time pickers
       Object.keys(openTimePickers).forEach((key) => {
         const index = parseInt(key);
         if (openTimePickers[index]) {
           const timePickerEl = timePickerRefs.current[index];
           const timePickerButtonEl = timePickerButtonRefs.current[index];
-          
+
           if (timePickerEl && !timePickerEl.contains(target) && timePickerButtonEl && !timePickerButtonEl.contains(target)) {
             setOpenTimePickers({ ...openTimePickers, [index]: false });
           }
@@ -61,35 +107,35 @@ export default function MatchPage() {
     }
   }, [openCalendars, openTimePickers]);
 
-  // TODO: This would come from authentication/database
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#0a1810] text-white">
+        <div className="text-center">
+          <div className="mb-4 text-6xl animate-bounce">🎄</div>
+          <div className="text-xl font-semibold animate-pulse text-[#d4c494]">Yükleniyor...</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!pairingData) return null;
+
   const matchInfo = {
     matchedWith: {
-      firstName: "Ayşe",
-      lastName: "Demir",
-      email: "ayse.demir@std.yildiz.edu.tr",
-      gender: "kadin",
-      interests: [
-        "Kitap Okuma",
-        "Kahve",
-        "Fotoğrafçılık",
-      ],
-      proposedTimes: [
-        "27 Aralık 2025 - 14:00",
-        "28 Aralık 2025 - 16:30",
-        "29 Aralık 2025 - 15:00",
-      ],
+      firstName: pairingData.receiverDisplayName ? pairingData.receiverDisplayName.split(" ")[0] : "Gizli",
+      lastName: pairingData.receiverDisplayName ? pairingData.receiverDisplayName.split(" ").slice(1).join(" ") : "İsim",
+      email: "hidden@yildiz.edu.tr",
+      gender: pairingData.receiverGender ? pairingData.receiverGender.toLowerCase() : "diger",
+      interests: pairingData.receiverInterests || [],
+      proposedTimes: [] as string[],
     },
     matchDate: "25 Aralık 2025",
     deliveryDate: "31 Aralık 2025",
-    myProposedTimes: [
-      "27 Aralık 2025 - 14:00",
-      "28 Aralık 2025 - 10:00",
-      "30 Aralık 2025 - 18:00",
-    ],
+    myProposedTimes: [],
   };
 
   // Generate hour options (09:00 to 21:00)
-  const hourOptions = Array.from({ length: 13 }, (_, i) => 
+  const hourOptions = Array.from({ length: 13 }, (_, i) =>
     String(i + 9).padStart(2, '0') + ':00'
   );
 
@@ -117,19 +163,19 @@ export default function MatchPage() {
       const parts = timeString.split(' - ');
       if (parts.length >= 1) {
         const datePart = parts[0].trim();
-        const months = ['ocak', 'şubat', 'mart', 'nisan', 'mayıs', 'haziran', 
-                       'temmuz', 'ağustos', 'eylül', 'ekim', 'kasım', 'aralık'];
-        
+        const months = ['ocak', 'şubat', 'mart', 'nisan', 'mayıs', 'haziran',
+          'temmuz', 'ağustos', 'eylül', 'ekim', 'kasım', 'aralık'];
+
         // Try to match format: "27 Aralık 2025" or "27 Aralık 2025 Salı"
         // The regex matches: day (1-2 digits) + month name + year (4 digits) + optional day name
         const dateMatch = datePart.match(/(\d{1,2})\s+(\w+)\s+(\d{4})/);
-        
+
         if (dateMatch) {
           const day = parseInt(dateMatch[1]);
           const monthName = dateMatch[2].toLowerCase();
           const year = parseInt(dateMatch[3]);
           const monthIndex = months.findIndex(m => m === monthName);
-          
+
           if (monthIndex !== -1) {
             // Use local date format to avoid timezone issues
             const yearStr = String(year);
@@ -145,22 +191,22 @@ export default function MatchPage() {
         }
       }
     });
-    
+
     // Debug output
     console.log('Parsed dates:', dates);
     console.log('Original proposedTimes:', matchInfo.matchedWith.proposedTimes);
-    
+
     return dates;
   };
 
   const otherUserSelectedDates = getOtherUserSelectedDates();
-  
+
   // Fallback: If parsing fails, use hardcoded dates for testing
   // This ensures the feature works even if parsing has issues
-  const finalOtherUserDates = otherUserSelectedDates.length > 0 
-    ? otherUserSelectedDates 
+  const finalOtherUserDates = otherUserSelectedDates.length > 0
+    ? otherUserSelectedDates
     : ['2025-12-27', '2025-12-28', '2025-12-29']; // Fallback for testing
-  
+
   // Debug: Log parsed dates
   if (typeof window !== 'undefined') {
     console.log('Karşı tarafın seçtiği tarihler (parsed):', otherUserSelectedDates);
@@ -175,24 +221,24 @@ export default function MatchPage() {
     if (dayNames.some(day => timeString.includes(day))) {
       return timeString;
     }
-    
+
     // Try to parse old format "DD Month YYYY - HH:MM" or "27 Aralık 2025 - 14:00"
     const parts = timeString.split(' - ');
     if (parts.length === 2) {
       const datePart = parts[0].trim();
       const timePart = parts[1].trim();
-      
+
       // Try to parse Turkish date format "DD Month YYYY"
-      const months = ['ocak', 'şubat', 'mart', 'nisan', 'mayıs', 'haziran', 
-                     'temmuz', 'ağustos', 'eylül', 'ekim', 'kasım', 'aralık'];
+      const months = ['ocak', 'şubat', 'mart', 'nisan', 'mayıs', 'haziran',
+        'temmuz', 'ağustos', 'eylül', 'ekim', 'kasım', 'aralık'];
       const dateMatch = datePart.match(/(\d+)\s+(\w+)\s+(\d+)/);
-      
+
       if (dateMatch) {
         const day = parseInt(dateMatch[1]);
         const monthName = dateMatch[2].toLowerCase();
         const year = parseInt(dateMatch[3]);
         const monthIndex = months.findIndex(m => m === monthName);
-        
+
         if (monthIndex !== -1) {
           const date = new Date(year, monthIndex, day);
           if (!isNaN(date.getTime())) {
@@ -200,14 +246,14 @@ export default function MatchPage() {
           }
         }
       }
-      
+
       // Try standard date parsing as fallback
       const date = new Date(datePart);
       if (!isNaN(date.getTime())) {
         return formatDate(date.toISOString().split('T')[0]) + ' - ' + timePart;
       }
     }
-    
+
     return timeString;
   };
 
@@ -275,7 +321,7 @@ export default function MatchPage() {
     // Convert Sunday (0) to Monday (0) as first day of week
     // Monday = 0, Tuesday = 1, ..., Sunday = 6
     const startingDayOfWeek = (firstDay.getDay() + 6) % 7;
-    
+
     const days: (number | null)[] = [];
     // Add empty cells for days before the first day of the month
     for (let i = 0; i < startingDayOfWeek; i++) {
@@ -309,7 +355,7 @@ export default function MatchPage() {
 
   // Check if date is already selected in other time slots (excluding current slot)
   const isDateAlreadySelected = (dateStr: string, currentSlotIndex: number): boolean => {
-    return myProposedTimes.some((slot, index) => 
+    return myProposedTimes.some((slot, index) =>
       index !== currentSlotIndex && slot.date === dateStr && slot.date !== ''
     );
   };
@@ -329,7 +375,7 @@ export default function MatchPage() {
   // Time Picker helpers
   const toggleTimePicker = (index: number) => {
     setOpenTimePickers({ ...openTimePickers, [index]: !openTimePickers[index] });
-    
+
     // Scroll to selected hour when opening
     if (!openTimePickers[index]) {
       setTimeout(() => {
@@ -365,7 +411,7 @@ export default function MatchPage() {
     const selectedIndex = Math.round(scrollTop / itemHeight);
     const clampedIndex = Math.max(0, Math.min(selectedIndex, hourOptions.length - 1));
     const selectedHour = hourOptions[clampedIndex];
-    
+
     // Update selected hour as user scrolls (optional - can be removed if you want manual selection only)
     // Uncomment the line below if you want auto-selection while scrolling
     // handleTimeSlotChange(index, 'hour', selectedHour);
@@ -401,10 +447,10 @@ export default function MatchPage() {
       //   headers: { 'Content-Type': 'application/json' },
       //   body: JSON.stringify({ times: myProposedTimes }),
       // });
-      
+
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
-      
+
       // Show success message or update UI
       alert('Zaman önerileriniz başarıyla kaydedildi!');
     } catch (error) {
@@ -424,21 +470,21 @@ export default function MatchPage() {
       {/* Background Layer - Snowflakes */}
       <div className={`fixed inset-0 z-0 pointer-events-none background-elements ${isZooming ? 'fade-out-background' : ''} ${revealed ? 'fade-in-background' : ''}`}>
         {/* Animated Snowflakes */}
-        <div className="snowflake" style={{left: '10%', animationDuration: '10s', animationDelay: '0s'}}>❄</div>
-        <div className="snowflake" style={{left: '20%', animationDuration: '12s', animationDelay: '2s', fontSize: '1.5em'}}>❄</div>
-        <div className="snowflake" style={{left: '30%', animationDuration: '15s', animationDelay: '4s'}}>❄</div>
-        <div className="snowflake" style={{left: '40%', animationDuration: '11s', animationDelay: '1s', fontSize: '1.2em'}}>❄</div>
-        <div className="snowflake" style={{left: '50%', animationDuration: '13s', animationDelay: '3s'}}>❄</div>
-        <div className="snowflake" style={{left: '60%', animationDuration: '14s', animationDelay: '5s', fontSize: '1.3em'}}>❄</div>
-        <div className="snowflake" style={{left: '70%', animationDuration: '12s', animationDelay: '2.5s'}}>❄</div>
-        <div className="snowflake" style={{left: '80%', animationDuration: '11s', animationDelay: '1.5s', fontSize: '1.4em'}}>❄</div>
-        <div className="snowflake" style={{left: '90%', animationDuration: '13s', animationDelay: '4.5s'}}>❄</div>
+        <div className="snowflake" style={{ left: '10%', animationDuration: '10s', animationDelay: '0s' }}>❄</div>
+        <div className="snowflake" style={{ left: '20%', animationDuration: '12s', animationDelay: '2s', fontSize: '1.5em' }}>❄</div>
+        <div className="snowflake" style={{ left: '30%', animationDuration: '15s', animationDelay: '4s' }}>❄</div>
+        <div className="snowflake" style={{ left: '40%', animationDuration: '11s', animationDelay: '1s', fontSize: '1.2em' }}>❄</div>
+        <div className="snowflake" style={{ left: '50%', animationDuration: '13s', animationDelay: '3s' }}>❄</div>
+        <div className="snowflake" style={{ left: '60%', animationDuration: '14s', animationDelay: '5s', fontSize: '1.3em' }}>❄</div>
+        <div className="snowflake" style={{ left: '70%', animationDuration: '12s', animationDelay: '2.5s' }}>❄</div>
+        <div className="snowflake" style={{ left: '80%', animationDuration: '11s', animationDelay: '1.5s', fontSize: '1.4em' }}>❄</div>
+        <div className="snowflake" style={{ left: '90%', animationDuration: '13s', animationDelay: '4.5s' }}>❄</div>
 
         {/* Floating Decorations */}
-        <div className="absolute left-[5%] top-[15%] text-4xl opacity-20 float-decoration" style={{animationDelay: '0s'}}>🎁</div>
-        <div className="absolute right-[8%] top-[25%] text-3xl opacity-20 float-decoration" style={{animationDelay: '1s'}}>🎄</div>
-        <div className="absolute left-[8%] top-[60%] text-3xl opacity-20 float-decoration" style={{animationDelay: '2s'}}>🎅</div>
-        <div className="absolute right-[5%] top-[70%] text-4xl opacity-20 float-decoration" style={{animationDelay: '1.5s'}}>🎁</div>
+        <div className="absolute left-[5%] top-[15%] text-4xl opacity-20 float-decoration" style={{ animationDelay: '0s' }}>🎁</div>
+        <div className="absolute right-[8%] top-[25%] text-3xl opacity-20 float-decoration" style={{ animationDelay: '1s' }}>🎄</div>
+        <div className="absolute left-[8%] top-[60%] text-3xl opacity-20 float-decoration" style={{ animationDelay: '2s' }}>🎅</div>
+        <div className="absolute right-[5%] top-[70%] text-4xl opacity-20 float-decoration" style={{ animationDelay: '1.5s' }}>🎁</div>
       </div>
 
       {/* Content Layer */}
@@ -472,7 +518,7 @@ export default function MatchPage() {
 
             {/* Reveal Card */}
             {!revealed ? (
-              <div 
+              <div
                 onClick={() => {
                   if (!isOpening && !isZooming) {
                     setIsZooming(true);
@@ -524,27 +570,27 @@ export default function MatchPage() {
                           <stop offset="60%" stopColor="#b91c1c" />
                           <stop offset="100%" stopColor="#991b1b" />
                         </linearGradient>
-                        
+
                         {/* Highlight gradient (light from top-left) */}
                         <linearGradient id="bow-highlight" x1="0%" y1="0%" x2="100%" y2="100%">
                           <stop offset="0%" stopColor="#ffffff" stopOpacity="0.6" />
                           <stop offset="40%" stopColor="#ffffff" stopOpacity="0.3" />
                           <stop offset="100%" stopColor="transparent" stopOpacity="0" />
                         </linearGradient>
-                        
+
                         {/* Shadow gradient */}
                         <linearGradient id="bow-shadow" x1="0%" y1="0%" x2="100%" y2="100%">
                           <stop offset="0%" stopColor="transparent" stopOpacity="0" />
                           <stop offset="100%" stopColor="#000000" stopOpacity="0.4" />
                         </linearGradient>
-                        
+
                         {/* Knot gradient */}
                         <radialGradient id="knot-gradient" cx="40%" cy="30%" r="80%">
                           <stop offset="0%" stopColor="#dc2626" />
                           <stop offset="50%" stopColor="#b91c1c" />
                           <stop offset="100%" stopColor="#991b1b" />
                         </radialGradient>
-                        
+
                         {/* Tail gradient */}
                         <linearGradient id="tail-gradient" x1="0%" y1="0%" x2="0%" y2="100%">
                           <stop offset="0%" stopColor="#dc2626" />
@@ -777,22 +823,22 @@ export default function MatchPage() {
               </div>
             ) : (
               <>
-                 {/* Match Revealed - Combined Card */}
-                 <div className="mb-8 rounded-2xl border border-[#4a6b5a]/30 bg-linear-to-br from-[#1a2f25]/50 to-[#0f1f18]/50 p-8 backdrop-blur-sm transition-all duration-500 match-revealed reveal-content zoom-out-content">
-                   <div className="mb-6 flex items-center gap-6">
-                     <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-[#4a6b5a] to-[#5a7b6a] text-4xl select-none transition-transform duration-300 hover:scale-110">
-                       {matchInfo.matchedWith.gender === "erkek" ? "♂️" : matchInfo.matchedWith.gender === "kadin" ? "♀️" : "⚧️"}
-                     </div>
-                     <div className="flex-1">
-                       <h2 className="mb-1 text-3xl font-bold text-[#d4c494]">
-                         {getInitials(matchInfo.matchedWith.firstName, matchInfo.matchedWith.lastName)}
-                       </h2>
-                       <p className="text-gray-400 text-sm">Gizlilik için tam isim gösterilmemektedir</p>
-                       <p className="mt-3 text-sm text-gray-300">
-                         Hediyeni <strong className="text-[#d4c494]">{matchInfo.deliveryDate}</strong> tarihinde teslim et. Bu bir <strong className="text-yellow-400">sır</strong> olmalı! 🤫
-                       </p>
-                     </div>
-                   </div>
+                {/* Match Revealed - Combined Card */}
+                <div className="mb-8 rounded-2xl border border-[#4a6b5a]/30 bg-linear-to-br from-[#1a2f25]/50 to-[#0f1f18]/50 p-8 backdrop-blur-sm transition-all duration-500 match-revealed reveal-content zoom-out-content">
+                  <div className="mb-6 flex items-center gap-6">
+                    <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-[#4a6b5a] to-[#5a7b6a] text-4xl select-none transition-transform duration-300 hover:scale-110">
+                      {matchInfo.matchedWith.gender === "erkek" ? "♂️" : matchInfo.matchedWith.gender === "kadin" ? "♀️" : "⚧️"}
+                    </div>
+                    <div className="flex-1">
+                      <h2 className="mb-1 text-3xl font-bold text-[#d4c494]">
+                        {getInitials(matchInfo.matchedWith.firstName, matchInfo.matchedWith.lastName)}
+                      </h2>
+                      <p className="text-gray-400 text-sm">Gizlilik için tam isim gösterilmemektedir</p>
+                      <p className="mt-3 text-sm text-gray-300">
+                        Hediyeni <strong className="text-[#d4c494]">{matchInfo.deliveryDate}</strong> tarihinde teslim et. Bu bir <strong className="text-yellow-400">sır</strong> olmalı! 🤫
+                      </p>
+                    </div>
+                  </div>
 
                   {/* Interests - Inline */}
                   <div className="rounded-lg bg-[#0a1810]/40 p-5 border border-[#4a6b5a]/20">
@@ -818,7 +864,7 @@ export default function MatchPage() {
                   </div>
 
                   <p className="mb-6 text-gray-300 leading-relaxed">
-                    Uygun olduğunuz <strong className="text-[#d4c494]">3 farklı gün</strong> ve <strong className="text-[#d4c494]">saat</strong> seçin. 
+                    Uygun olduğunuz <strong className="text-[#d4c494]">3 farklı gün</strong> ve <strong className="text-[#d4c494]">saat</strong> seçin.
                     Eşleştiğiniz kişinin önerileriyle karşılaştırıp ortak zaman bulabilirsiniz.
                   </p>
 
@@ -830,13 +876,12 @@ export default function MatchPage() {
                     const allSlotsFilled = myProposedTimes.length === 3 && filledSlots.length === 3;
                     const allDatesDifferent = dates.length === 3 && uniqueDates.size === 3;
                     const isComplete = allSlotsFilled && allDatesDifferent;
-                    
+
                     return (
-                      <div className={`mb-6 rounded-lg border p-4 transition-all duration-200 ${
-                        isComplete 
-                          ? "border-[#4a6b5a]/40 bg-[#4a6b5a]/5"
-                          : "border-yellow-600/50 bg-yellow-600/10"
-                      }`}>
+                      <div className={`mb-6 rounded-lg border p-4 transition-all duration-200 ${isComplete
+                        ? "border-[#4a6b5a]/40 bg-[#4a6b5a]/5"
+                        : "border-yellow-600/50 bg-yellow-600/10"
+                        }`}>
                         <div className="flex items-start gap-3">
                           <svg className={`h-5 w-5 flex-shrink-0 mt-0.5 ${isComplete ? "text-[#4a6b5a]" : "text-yellow-400"}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={isComplete ? "M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" : "M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"} />
@@ -855,13 +900,13 @@ export default function MatchPage() {
                                   3 farklı gün ve saat seçmelisin
                                 </p>
                                 <p className="text-xs text-yellow-300/80">
-                                  {myProposedTimes.length < 3 
+                                  {myProposedTimes.length < 3
                                     ? `${3 - myProposedTimes.length} zaman slotu daha ekleyin.`
                                     : filledSlots.length < 3
-                                    ? `${3 - filledSlots.length} zaman slotu için tarih ve saat seçin.`
-                                    : !allDatesDifferent
-                                    ? "Her zaman slotu için farklı bir gün seçin."
-                                    : ""
+                                      ? `${3 - filledSlots.length} zaman slotu için tarih ve saat seçin.`
+                                      : !allDatesDifferent
+                                        ? "Her zaman slotu için farklı bir gün seçin."
+                                        : ""
                                   }
                                 </p>
                               </>
@@ -875,7 +920,7 @@ export default function MatchPage() {
                   {/* My Proposed Times Form */}
                   <div className="mb-6 rounded-lg bg-[#0a1810]/40 p-6 border border-[#4a6b5a]/20">
                     <h4 className="mb-4 text-lg font-semibold text-[#d4c494]">Senin Önerdiğin Zamanlar</h4>
-                    
+
                     {/* Time Slots */}
                     <div className="space-y-3 mb-4">
                       {myProposedTimes.map((slot, index) => (
@@ -902,11 +947,10 @@ export default function MatchPage() {
                                 type="button"
                                 onClick={() => handleMoveSlotUp(index)}
                                 disabled={index === 0}
-                                className={`p-1.5 rounded transition-all duration-150 ${
-                                  index === 0
-                                    ? "text-gray-600 cursor-not-allowed opacity-30"
-                                    : "text-[#d4c494] hover:bg-[#4a6b5a]/30 hover:text-white hover:scale-110 active:scale-95"
-                                }`}
+                                className={`p-1.5 rounded transition-all duration-150 ${index === 0
+                                  ? "text-gray-600 cursor-not-allowed opacity-30"
+                                  : "text-[#d4c494] hover:bg-[#4a6b5a]/30 hover:text-white hover:scale-110 active:scale-95"
+                                  }`}
                                 aria-label="Yukarı taşı"
                                 title="Yukarı taşı"
                               >
@@ -919,11 +963,10 @@ export default function MatchPage() {
                                 type="button"
                                 onClick={() => handleMoveSlotDown(index)}
                                 disabled={index === myProposedTimes.length - 1}
-                                className={`p-1.5 rounded transition-all duration-150 ${
-                                  index === myProposedTimes.length - 1
-                                    ? "text-gray-600 cursor-not-allowed opacity-30"
-                                    : "text-[#d4c494] hover:bg-[#4a6b5a]/30 hover:text-white hover:scale-110 active:scale-95"
-                                }`}
+                                className={`p-1.5 rounded transition-all duration-150 ${index === myProposedTimes.length - 1
+                                  ? "text-gray-600 cursor-not-allowed opacity-30"
+                                  : "text-[#d4c494] hover:bg-[#4a6b5a]/30 hover:text-white hover:scale-110 active:scale-95"
+                                  }`}
                                 aria-label="Aşağı taşı"
                                 title="Aşağı taşı"
                               >
@@ -963,10 +1006,10 @@ export default function MatchPage() {
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                 </svg>
                               </button>
-                              
+
                               {/* Custom Calendar */}
                               {openCalendars[index] && (
-                                <div 
+                                <div
                                   ref={(el) => { calendarRefs.current[index] = el; }}
                                   className="absolute z-50 mt-2 w-full rounded-xl border border-[#4a6b5a]/50 bg-[#0a1810] p-4 shadow-2xl animate-in fade-in slide-in-from-top-2 duration-200"
                                 >
@@ -977,7 +1020,7 @@ export default function MatchPage() {
                                     const dayNames = ['Pt', 'Sa', 'Ça', 'Pe', 'Cu', 'Ct', 'Pz']; // Monday first
                                     const days = getCalendarDays(current.year, current.month);
                                     const selectedDateISO = slot.date;
-                                    
+
                                     return (
                                       <div>
                                         {/* Calendar Header - No navigation, only December 2025 */}
@@ -986,31 +1029,30 @@ export default function MatchPage() {
                                             {monthNames[current.month]} {current.year}
                                           </h5>
                                         </div>
-                                        
+
                                         {/* Day Names */}
                                         <div className="mb-2 grid grid-cols-7 gap-1">
                                           {dayNames.map((day, i) => {
                                             const isWeekend = i === 5 || i === 6; // Saturday or Sunday
                                             return (
-                                              <div 
-                                                key={i} 
-                                                className={`text-center text-xs font-medium py-1 ${
-                                                  isWeekend ? "text-orange-400/70" : "text-gray-500"
-                                                }`}
+                                              <div
+                                                key={i}
+                                                className={`text-center text-xs font-medium py-1 ${isWeekend ? "text-orange-400/70" : "text-gray-500"
+                                                  }`}
                                               >
                                                 {day}
                                               </div>
                                             );
                                           })}
                                         </div>
-                                        
+
                                         {/* Calendar Days */}
                                         <div className="grid grid-cols-7 gap-1">
                                           {days.map((day, dayIndex) => {
                                             if (day === null) {
                                               return <div key={dayIndex} className="aspect-square" />;
                                             }
-                                            
+
                                             const dateISO = formatDateToISO(current.year, current.month, day);
                                             const isSelected = selectedDateISO === dateISO;
                                             const isOtherUserDate = isDateInOtherUserSelection(dateISO);
@@ -1020,11 +1062,11 @@ export default function MatchPage() {
                                             const isWeekend = dayOfWeek === 5 || dayOfWeek === 6; // Saturday (5) or Sunday (6)
                                             // Don't disable if it's other user's date (even if already selected by user)
                                             const isDisabled = isPast || (isAlreadySelected && !isOtherUserDate);
-                                            
+
                                             // Determine styling with priority: selected > other user date > already selected > past > weekend > normal
                                             let buttonClasses = "";
                                             let buttonTitle = "";
-                                            
+
                                             if (isSelected) {
                                               // If selected and also other user's date, show special styling
                                               if (isOtherUserDate) {
@@ -1056,7 +1098,7 @@ export default function MatchPage() {
                                               buttonClasses = "text-gray-300 hover:bg-[#4a6b5a]/30 hover:text-white";
                                               buttonTitle = "";
                                             }
-                                            
+
                                             return (
                                               <button
                                                 key={dayIndex}
@@ -1098,7 +1140,7 @@ export default function MatchPage() {
                                             );
                                           })}
                                         </div>
-                                        
+
                                         {/* Legend */}
                                         <div className="mt-4 space-y-2 border-t border-[#4a6b5a]/30 pt-3">
                                           {finalOtherUserDates.length > 0 && (
@@ -1142,16 +1184,16 @@ export default function MatchPage() {
                                 <span className={slot.hour ? "text-white font-medium" : "text-gray-500"}>
                                   {slot.hour || "Saat seçin"}
                                 </span>
-                                <svg 
-                                  className={`h-4 w-4 text-[#d4c494] transition-transform duration-200 ${openTimePickers[index] ? 'rotate-180' : ''}`} 
-                                  fill="none" 
-                                  stroke="currentColor" 
+                                <svg
+                                  className={`h-4 w-4 text-[#d4c494] transition-transform duration-200 ${openTimePickers[index] ? 'rotate-180' : ''}`}
+                                  fill="none"
+                                  stroke="currentColor"
                                   viewBox="0 0 24 24"
                                 >
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                                 </svg>
                               </button>
-                              
+
                               {/* Time Picker Dropdown */}
                               {openTimePickers[index] && (
                                 <div
@@ -1161,16 +1203,16 @@ export default function MatchPage() {
                                   <div className="relative h-60 overflow-hidden">
                                     {/* Selection indicator - center highlight */}
                                     <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-12 pointer-events-none z-10 border-t-2 border-b-2 border-[#4a6b5a]/60 bg-[#4a6b5a]/10"></div>
-                                    
+
                                     {/* Gradient masks for fade effect at top and bottom */}
                                     <div className="absolute inset-x-0 top-0 h-16 bg-gradient-to-b from-[#0a1810] to-transparent pointer-events-none z-20"></div>
                                     <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-[#0a1810] to-transparent pointer-events-none z-20"></div>
-                                    
+
                                     {/* Scrollable hour list */}
-                                    <div 
+                                    <div
                                       className="time-picker-scroll h-full overflow-y-auto py-24"
                                       onScroll={(e) => handleTimePickerScroll(index, e)}
-                                      style={{ 
+                                      style={{
                                         scrollbarWidth: 'none',
                                         msOverflowStyle: 'none',
                                         WebkitOverflowScrolling: 'touch'
@@ -1183,11 +1225,10 @@ export default function MatchPage() {
                                             key={hour}
                                             type="button"
                                             onClick={() => handleHourSelect(index, hour)}
-                                            className={`w-full h-12 flex items-center justify-center text-lg font-semibold transition-all ${
-                                              isSelected
-                                                ? "text-[#d4c494] scale-110"
-                                                : "text-gray-400 hover:text-gray-300"
-                                            }`}
+                                            className={`w-full h-12 flex items-center justify-center text-lg font-semibold transition-all ${isSelected
+                                              ? "text-[#d4c494] scale-110"
+                                              : "text-gray-400 hover:text-gray-300"
+                                              }`}
                                           >
                                             {hour}
                                           </button>
@@ -1269,7 +1310,7 @@ export default function MatchPage() {
                     <h4 className="mb-4 text-lg font-semibold text-[#d4c494]">
                       {matchInfo.matchedWith.firstName.charAt(0)}. Önerdiği Zamanlar
                     </h4>
-                    
+
                     {/* Overlapping Times Alert - Inline */}
                     {overlappingTimes.length > 0 && (
                       <div className="mb-4 rounded-lg border border-green-600/50 bg-green-600/10 p-3">
@@ -1293,18 +1334,16 @@ export default function MatchPage() {
                           return (
                             <div
                               key={index}
-                              className={`rounded-lg border p-3 transition-all duration-200 ${
-                                isOverlapping
-                                  ? "border-green-600/50 bg-green-600/10"
-                                  : "border-[#4a6b5a]/30 bg-[#0a1810]/30"
-                              }`}
+                              className={`rounded-lg border p-3 transition-all duration-200 ${isOverlapping
+                                ? "border-green-600/50 bg-green-600/10"
+                                : "border-[#4a6b5a]/30 bg-[#0a1810]/30"
+                                }`}
                             >
                               <div className="flex items-center gap-3">
-                                <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-all duration-200 ${
-                                  isOverlapping
-                                    ? "bg-green-600/30 text-green-400"
-                                    : "bg-[#4a6b5a]/30 text-[#d4c494]"
-                                }`}>
+                                <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-all duration-200 ${isOverlapping
+                                  ? "bg-green-600/30 text-green-400"
+                                  : "bg-[#4a6b5a]/30 text-[#d4c494]"
+                                  }`}>
                                   {isOverlapping ? (
                                     <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -1319,9 +1358,8 @@ export default function MatchPage() {
                                   {isOverlapping && (
                                     <p className="text-xs font-medium text-green-400 mb-0.5">Ortak Zaman 🎯</p>
                                   )}
-                                  <p className={`text-sm font-medium ${
-                                    isOverlapping ? "text-green-300" : "text-gray-300"
-                                  }`}>
+                                  <p className={`text-sm font-medium ${isOverlapping ? "text-green-300" : "text-gray-300"
+                                    }`}>
                                     {formattedTime}
                                   </p>
                                 </div>

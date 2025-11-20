@@ -55,17 +55,9 @@ export default function ProfilePage() {
       setIsLoadingUser(true);
       setIsLoadingPairing(true);
       try {
-        // Get token from localStorage
-        const token = localStorage.getItem("token");
-
         const headers: HeadersInit = {
           "Accept": "application/json",
         };
-
-        // Add Authorization header if token exists
-        if (token) {
-          headers["Authorization"] = `Bearer ${token}`;
-        }
 
         // Fetch User
         const userRes = await fetch("https://api.yildizliagac.com/api/v1/users/getCurrentUser", {
@@ -73,6 +65,12 @@ export default function ProfilePage() {
           credentials: "include",
           headers,
         });
+
+        if (userRes.status === 401 || userRes.status === 403) {
+          router.push("/login");
+          return;
+        }
+
         const userData = await userRes.json().catch(() => null);
 
         if (!cancelled) {
@@ -91,6 +89,12 @@ export default function ProfilePage() {
           credentials: "include",
           headers,
         });
+
+        if (pairingRes.status === 401 || pairingRes.status === 403) {
+          router.push("/login");
+          return;
+        }
+
         const pairingJson = await pairingRes.json().catch(() => null);
 
         if (!cancelled) {
@@ -119,17 +123,9 @@ export default function ProfilePage() {
     if (isLoggingOut) return;
     setIsLoggingOut(true);
     try {
-      // Get token from localStorage
-      const token = localStorage.getItem("token");
-
       const headers: HeadersInit = {
         "Accept": "application/json",
       };
-
-      // Add Authorization header if token exists
-      if (token) {
-        headers["Authorization"] = `Bearer ${token}`;
-      }
 
       const response = await fetch("https://api.yildizliagac.com/api/v1/auth/logout", {
         method: "POST",
